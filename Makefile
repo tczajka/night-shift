@@ -4,10 +4,9 @@ BUILD   := build
 TAP     := $(BUILD)/nightshift.tap
 SOURCES := $(wildcard src/*.asm)
 
-# Stricter parsing (see sjasmplus --help=syntax) and all optional warnings.
-# Not using the 'w' (warnings as errors) syntax option: the whole-RAM
-# SAVETAP always warns, and that warning cannot be suppressed.
-ASMFLAGS := --syntax=abf -Wall
+# Stricter parsing, warnings as errors (see sjasmplus --help=syntax), and all
+# optional warnings.
+ASMFLAGS := --syntax=abfw -Wall
 
 .PHONY: all run clean
 

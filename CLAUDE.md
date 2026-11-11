@@ -43,31 +43,39 @@ The project is new. See `README.md` for the player-facing description.
 - `make run`: build, then run the tape in Fuse as a 48K machine.
 - `make clean`: delete `build/`.
 
-The assembler runs with `--syntax=abf -Wall` (`ASMFLAGS` in the Makefile):
+The assembler runs with `--syntax=abfw -Wall` (`ASMFLAGS` in the Makefile):
 `a` makes `,,` the multi-argument separator (so `sub a,b` is not read as
 two instructions), `b` allows parentheses around an operand only for real
-memory access, `f` warns on fake (macro-like) instructions, and `-Wall`
-enables every optional warning. The `w` option (warnings as errors) is left
-out because of the SAVETAP warning below. Treat any other warning as
-something to fix.
-
-Every build prints a `[SAVETAP] Tape file will not contain data from 0x5B00
-to 0x5E00` warning. It is expected: that range (printer buffer, system
-variables, BASIC loader) is not saved to the tape, so the game must not
-place code or data there.
+memory access, `f` warns on fake (macro-like) instructions, `w` turns
+warnings into errors, and `-Wall` enables every optional warning. A build
+must produce no warnings.
 
 ## Source layout
 
 - `src/main.asm` is the only file passed to sjasmplus. It sets the device,
-  `ORG`, and entry point `start`, and ends with `SAVETAP`. Other source files
-  are pulled in with `INCLUDE`; binary data with `INCBIN`.
+  `ORG`, and entry point `start`, and includes everything else. Other source
+  files are pulled in with `INCLUDE`; binary data with `INCBIN`.
+- All game code and data must sit between the `code_start` and `code_end`
+  labels in `main.asm`: only that range is saved to tape.
 - Wrap each included file in `MODULE <Name>` / `ENDMODULE` so its labels
   become `<Name>.label`. Use `.local` labels inside routines.
 - The Makefile rebuilds when any `src/*.asm` changes. Add binary data
   files (or their directory) to the dependencies when introducing `INCBIN`.
-- `SAVETAP "file", start` writes a whole-RAM tape with a BASIC loader (about
-  32KB). A smaller release tape (own loader plus a code block via `EMPTYTAP`
-  and per-block `SAVETAP`) can replace it later.
+
+## Tape and memory
+
+`src/tape.asm` (included last) builds the tape from two blocks:
+
+1. A BASIC program, autostarting at line 10:
+   `10 CLEAR VAL "32767": LOAD "" CODE : RANDOMIZE USR VAL "32768"`.
+   Its tokenized bytes are assembled at PROG (0x5CCB) only so `SAVETAP` can
+   write them.
+2. A CODE block with `code_start`..`code_end`, loaded at 0x8000.
+
+`CLEAR 32767` puts RAMTOP, and therefore the BASIC stack used when the game
+starts, just below the code. The two addresses in the BASIC line are text,
+so moving `ORG` means editing them too; `ASSERT`s in `tape.asm` fail the
+build if they disagree with `code_start` and `start`.
 
 ## Open decisions
 

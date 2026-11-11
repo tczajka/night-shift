@@ -5,10 +5,16 @@
 
     ORG 0x8000                  ; above contended memory
 
+; Everything between code_start and code_end is saved to tape as one CODE
+; block. All game code and data must be included inside this range.
+code_start:
+
 start:
     ei
 .loop:
     halt                        ; wait for the next frame interrupt
     jr .loop
 
-    SAVETAP "nightshift.tap", start
+code_end:
+
+    INCLUDE "tape.asm"
