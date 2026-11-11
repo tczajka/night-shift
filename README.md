@@ -45,3 +45,7 @@ and starts it in Fuse as a 48K Spectrum.
 On Ubuntu, install Fuse with
 `sudo apt install fuse-emulator-gtk spectrum-roms`.
 On real hardware, load the tape with `LOAD ""`.
+
+## License
+
+[MIT](LICENSE)
