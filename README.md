@@ -22,10 +22,17 @@ Kempston joystick support.
 
 ## Building
 
-To be documented once the toolchain is chosen.
+Requires [sjasmplus](https://github.com/z00m128/sjasmplus). Build commands
+will be documented once there is code to build.
 
 ## Running
 
-Load the `.tap` file in a Spectrum emulator such as
-[Fuse](https://fuse-emulator.sourceforge.net/), or on real hardware with
-`LOAD ""`.
+Load the `.tap` file in a Spectrum emulator. Development uses
+[Fuse](https://fuse-emulator.sourceforge.net/):
+
+```
+fuse-gtk --machine 48 nightshift.tap
+```
+
+On Ubuntu, install it with `sudo apt install fuse-emulator-gtk spectrum-roms`.
+On real hardware, load the tape with `LOAD ""`.

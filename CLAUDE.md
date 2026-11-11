@@ -26,15 +26,21 @@ The project is new. See `README.md` for the player-facing description.
 - Output is a `.tap` image with a BASIC loader followed by a machine-code
   block.
 
+## Toolchain
+
+- **Assembler:** sjasmplus (v1.24.0, at `/usr/local/bin/sjasmplus`). The
+  game is written in pure Z80 assembly using sjasmplus syntax.
+- **Emulator:** Fuse 1.6.0, GTK build (`fuse-gtk`). Run a tape with
+  `fuse-gtk --machine 48 <file>.tap`. 48K is the default machine, but
+  passing the flag keeps a machine choice saved in `~/.fuserc` from
+  overriding it.
+
 ## Open decisions
 
 Record each choice here, and in `README.md` where it affects players, once
 it has been made:
 
-- Language and toolchain (for example, sjasmplus or pasmo for pure Z80
-  assembly, or z88dk for C mixed with assembly)
 - Build system (Makefile) and the build/run commands
-- Emulator used for testing (for example, Fuse or ZEsarUX)
 - Level data format and level count
 - Input scheme (keyboard layout, joystick types)
 - Whether to support 128K features (AY sound, extra memory)
