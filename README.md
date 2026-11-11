@@ -17,8 +17,15 @@ Early development. There is nothing to build or play yet.
 
 ## Controls
 
-To be decided. The likely default is QAOP + Space, with Sinclair and
-Kempston joystick support.
+Cursor keys or a cursor (Protek/AGF) joystick:
+
+| Key | Action |
+| --- | --- |
+| 5 / 6 / 7 / 8 | Left / down / up / right |
+| 0 | Fire: choose a level, pause, confirm |
+
+Caps Shift is optional, so the cursor keys work both as plain 5–8 and as
+Caps Shift + 5–8 (the dedicated cursor keys on later models).
 
 ## Building
 

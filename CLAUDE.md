@@ -77,13 +77,47 @@ starts, just below the code. The two addresses in the BASIC line are text,
 so moving `ORG` means editing them too; `ASSERT`s in `tape.asm` fail the
 build if they disagree with `code_start` and `start`.
 
+## Screen design
+
+`design/` holds character-cell mock-ups of each screen (32×24 cells):
+`level.txt` (play), `pause.txt` (pause menu), `level-choice.txt` (level
+select). Keep them in sync with the code. Decisions not visible in them:
+
+- 100 levels, numbered 00–99.
+- The board is 16×11 tiles of 16×16 pixels (2×2 character cells each), below
+  two header rows. Each tile owns its attribute cells, so tiles have their own
+  colours without clash; the player moves a whole tile at a time.
+- The game counts pushes, not moves, plus elapsed time. "Best" holds each
+  level's best pushes and best time.
+- On level select, the header shows the selected level's best scores. Solved
+  levels and the selected level are each shown in their own colour.
+- The pause box (12×5) sits on columns 10–21, rows 10–14: centred on the
+  board (8 board rows above, 9 below, as 5 rows cannot split 22 evenly).
+  `pause.txt` draws the board as dots to show this.
+- When a level is solved, the top header line is highlighted and the game
+  waits for fire, then returns to level select.
+- There is no undo, by design; Restart is the way out of a dead end.
+
+## Controls
+
+Cursor keys and the cursor (Protek/AGF) joystick only: directions are keys
+5 ← 6 ↓ 7 ↑ 8 →, fire is 0. No other joystick interfaces or redefinable
+keys.
+
+- Read the keys from half-rows 0xF7FE (bit 4 = 5) and 0xEFFE (bit 0 = 0,
+  bit 1 = 9, bit 2 = 8, bit 3 = 7, bit 4 = 6); a pressed key reads as 0.
+  Ignore Caps Shift, so both 5–8 and Caps Shift + 5–8 (what the dedicated
+  cursor keys on the Spectrum+ and later models send) work.
+- Fire chooses a level on level select, opens the pause menu during play,
+  confirms the selected pause-menu item, and leaves the solved-level
+  screen.
+
 ## Open decisions
 
 Record each choice here, and in `README.md` where it affects players, once
 it has been made:
 
-- Level data format and level count
-- Input scheme (keyboard layout, joystick types)
+- Level data format
 - Whether to support 128K features (AY sound, extra memory)
 
 ## Conventions
