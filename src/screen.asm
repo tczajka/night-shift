@@ -80,6 +80,39 @@ print_char_addr:
     inc e                       ; next cell
     ret
 
+; Draw a string from the ROM font, left to right from a character cell.
+; Leaves attributes unchanged.
+; Entry: HL = string, A = length (0-255), B = row (0-23), C = column (0-31).
+; Exit: DE = address of the cell after the string (see print_char_addr).
+; Clobbers: A, B, HL.
+print_string:
+    push af
+    call char_address
+    pop af
+    ld b,a
+    ; fall through
+
+; Draw a string from the ROM font, left to right from a bitmap address.
+; Leaves attributes unchanged.
+; Entry: HL = string, B = length (0-255), DE = address of the first cell's
+; top pixel line (see char_address).
+; Exit: DE = address of the cell after the string (see print_char_addr).
+; Clobbers: A, B, HL.
+print_string_addr:
+    ld a,b
+    or a
+    ret z
+.char:
+    ld a,(hl)
+    push hl
+    push bc
+    call print_char_addr
+    pop bc
+    pop hl
+    inc hl
+    djnz .char
+    ret
+
 ; Bitmap address of the top pixel line of a character cell. The cell's other
 ; 7 lines follow at D + 1 ... D + 7, with E unchanged.
 ; Entry: B = row (0-23), C = column (0-31).

@@ -21,6 +21,7 @@ start:
     INCLUDE "interrupt.asm"
     INCLUDE "input.asm"
     INCLUDE "screen.asm"
+    INCLUDE "header.asm"
     INCLUDE "splash.asm"
     INCLUDE "level_select.asm"
 code_end:
