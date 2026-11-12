@@ -87,6 +87,35 @@ starts, just below the code. The two addresses in the BASIC line are text,
 so moving `ORG` means editing them too; `ASSERT`s in `tape.asm` fail the
 build if they disagree with `code_start` and `start`.
 
+## Memory and interrupts
+
+`src/memory.asm` (module `Memory`, included before the code so its labels
+are defined before use) holds the memory map and labels for areas set up at
+run time:
+
+- `Memory.interrupt_entry` (0xFDFD, 3 bytes): `JP` to the interrupt handler.
+- `Memory.interrupt_vectors` (0xFE00–0xFF00, 257 bytes): IM 2 vector table.
+
+It asserts that the code block ends below them. Reserved areas use `DS`
+only to get addresses; they are outside `code_start`..`code_end`, so nothing
+is saved to tape for them.
+
+`src/interrupt.asm` (module `Interrupt`) switches to IM 2 with our own frame
+interrupt handler (`Interrupt.handler`, 50 Hz); `start` calls
+`Interrupt.init` first. The handler currently does nothing.
+
+- `init` fills the vector table with the low byte of `interrupt_entry`
+  (0xFD; all 257 bytes, since the data bus value during the interrupt is
+  unreliable) and writes `JP handler` at `interrupt_entry`. `Interrupt`
+  asserts the layout this needs: table page-aligned, entry address the same
+  byte twice.
+- `I` must never point into 0x4000–0x7FFF (causes screen "snow" on a 48K).
+- The ROM's IM 1 handler no longer runs: the FRAMES counter and the ROM
+  keyboard scan (LAST_K etc.) stop updating, and IY is free to use. The game
+  must not return to BASIC.
+- The handler must preserve every register it uses and end with `ei` /
+  `reti`.
+
 ## Screen design
 
 `design/` holds character-cell mock-ups of each screen (32×24 cells):
