@@ -3,10 +3,12 @@
 ;   0000-3FFF  ROM
 ;   4000-57FF  screen bitmap
 ;   5800-5AFF  screen attributes
-;   5B00-7FFF  system variables, BASIC loader and its stack (RAMTOP 7FFF)
-;   8000-....  code block (code_start..code_end), loaded from tape
-;   E000-FCFF  stack (7.25KB), grows down from stack_top
-;   FDFD-FF00  IM 2 interrupt entry and vector table, built at run time
+;   5B00-7FFF  BASIC
+;   8000-....  code (code_start..code_end), loaded from tape
+;   E000-FCFF  stack (7.25KB)
+;   FDFD-FDFF  interrupt entry
+;   FE00-FF00  interrupt table
+;   FF58-FFFF  BASIC
 ;
 ; Only the code block is on tape. The areas reserved here are set up by the
 ; code at run time; the DS directives just give them addresses.
