@@ -38,6 +38,32 @@ clear:
     ldir
     ret
 
+; Draw a 2-digit binary coded decimal number from the ROM font.
+; Leaves attributes unchanged.
+; Entry: A = number in BCD (0x00-0x99), DE = address of the first digit's
+; cell (see char_address).
+; Exit: DE = address of the cell after the number (see print_char).
+; Clobbers: A, B, HL.
+print_digits_2:
+    push af
+    rrca                        ; high digit
+    rrca
+    rrca
+    rrca
+    call print_digit
+    pop af                      ; low digit
+    ; fall through
+
+; Draw a decimal digit from the ROM font. Leaves the attribute unchanged.
+; Entry: A = digit (0-9) in the low 4 bits; the high 4 bits are ignored.
+; DE = address of the cell (see char_address).
+; Exit: DE = address of the next cell (see print_char).
+; Clobbers: A, B, HL.
+print_digit:
+    and 0x0F
+    add a,'0'
+    ; fall through
+
 ; Draw a character from the ROM font at a bitmap address. Leaves the cell's
 ; attribute unchanged.
 ; Entry: A = character (32-127), DE = address of the cell's top pixel line
@@ -89,26 +115,6 @@ print_string:
     inc hl
     djnz .char
     ret
-
-; Draw a 2-digit binary coded decimal number from the ROM font.
-; Leaves attributes unchanged.
-; Entry: A = number in BCD (0x00-0x99), DE = address of the first digit's
-; cell (see char_address).
-; Exit: DE = address of the cell after the number (see print_char).
-; Clobbers: A, B, HL.
-print_bcd:
-    push af
-    rrca                        ; high digit
-    rrca
-    rrca
-    rrca
-    and 0x0F
-    add a,'0'
-    call print_char
-    pop af
-    and 0x0F                    ; low digit
-    add a,'0'
-    jp print_char
 
 ; Bitmap address of the top pixel line of a character cell. The cell's other
 ; 7 lines follow at D + 1 ... D + 7, with E unchanged.
