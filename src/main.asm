@@ -12,6 +12,7 @@
 code_start:
 
 start:
+    ld sp,Memory.stack_top      ; leave the BASIC stack; no return to BASIC
     call Interrupt.init
 .loop:
     halt                        ; wait for the next frame interrupt

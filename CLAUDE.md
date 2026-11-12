@@ -82,8 +82,9 @@ ROM, so the "Bytes: ..." messages printed when each header loads don't
 overwrite the bottom of the loading screen. The game must therefore not
 print through ROM channel S (it draws to the screen directly anyway).
 
-`CLEAR 32767` puts RAMTOP, and therefore the BASIC stack used when the game
-starts, just below the code. The two addresses in the BASIC line are text,
+`CLEAR 32767` puts RAMTOP, and therefore the BASIC stack, just below the
+code so loading doesn't overwrite it. The game switches to its own stack
+first thing (see below). The two addresses in the BASIC line are text,
 so moving `ORG` means editing them too; `ASSERT`s in `tape.asm` fail the
 build if they disagree with `code_start` and `start`.
 
@@ -93,10 +94,19 @@ build if they disagree with `code_start` and `start`.
 are defined before use) holds the memory map and labels for areas set up at
 run time:
 
+- `Memory.stack` .. `Memory.stack_top` (0xE000–0xFCFF, 7.25KB): the stack,
+  in uncontended memory. 0xFD00–0xFDFC is unused. `start` sets SP to `Memory.stack_top`
+  as its first instruction, abandoning the BASIC stack (so the game can
+  never return to BASIC).
 - `Memory.interrupt_entry` (0xFDFD, 3 bytes): `JP` to the interrupt handler.
 - `Memory.interrupt_vectors` (0xFE00–0xFF00, 257 bytes): IM 2 vector table.
 
-It asserts that the code block ends below them. Reserved areas use `DS`
+It asserts that the code block ends below the stack and that the stack
+ends below the interrupt entry; the entry and vector table follow each
+other directly, so they cannot overlap. sjasmplus does not detect
+overlapping `ORG` regions itself, so every new `ORG` in `Memory` needs an
+`ASSERT $ <= <label of the next region>` before it. Nothing checks for
+stack overflow at run time. Reserved areas use `DS`
 only to get addresses; they are outside `code_start`..`code_end`, so nothing
 is saved to tape for them.
 

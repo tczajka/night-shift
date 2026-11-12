@@ -2,8 +2,10 @@
 ;
 ;   0x0000-0x3FFF  ROM
 ;   0x4000-0x5AFF  screen (bitmap, then attributes)
-;   0x5B00-0x7FFF  system variables, BASIC loader, stack (below RAMTOP 0x7FFF)
+;   0x5B00-0x7FFF  system variables, BASIC loader and its stack (RAMTOP 0x7FFF)
 ;   0x8000-...     code block (code_start..code_end), loaded from tape
+;   0xE000-0xFCFF  stack (7.25KB), grows down from stack_top
+;   0xFD00-0xFDFC  unused
 ;   0xFDFD-0xFF00  IM 2 interrupt entry and vector table, built at run time
 ;
 ; Only the code block is on tape. The areas reserved here are set up by the
@@ -11,8 +13,17 @@
 
     MODULE Memory
 
-    ASSERT @code_end <= interrupt_entry
+    ASSERT @code_end <= stack
 
+    ORG 0xE000
+
+; Stack: SP starts at stack_top (set by `start`) and grows down towards
+; stack. Uncontended memory, so pushes and calls run at full speed.
+stack:
+    DS 0xFD00 - stack
+stack_top:
+
+    ASSERT $ <= interrupt_entry       ; the stack must not overlap what follows
     ORG 0xFDFD
 
 ; JP to the interrupt handler (3 bytes). Its address must be the same byte
