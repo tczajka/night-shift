@@ -80,23 +80,75 @@ build if they disagree with `code_start` and `start`.
 ## Screen design
 
 `design/` holds character-cell mock-ups of each screen (32×24 cells):
-`level.txt` (play), `pause.txt` (pause menu), `level-choice.txt` (level
-select). Keep them in sync with the code. Decisions not visible in them:
+`splash.txt` (loading/splash screen), `level.txt` (play), `pause.txt` (pause
+menu), `level-choice.txt` (level select). Keep them in sync with the code.
+Decisions not visible in them:
 
+- The loading screen doubles as the splash screen. It is a picture loaded
+  from tape before the code; when the code starts, the picture is still in
+  screen memory, so the game just waits for fire and then goes to level
+  select. The GitHub URL is part of the picture, on the bottom character row
+  (centred, columns 1–30), kept clear of the art so its attributes don't
+  clash. Not implemented yet: the tape has no screen block so far.
 - 100 levels, numbered 00–99.
 - The board is 16×11 tiles of 16×16 pixels (2×2 character cells each), below
-  two header rows. Each tile owns its attribute cells, so tiles have their own
-  colours without clash; the player moves a whole tile at a time.
+  two header rows. See "Board graphics and animation" for how it is drawn.
 - The game counts pushes, not moves, plus elapsed time. "Best" holds each
   level's best pushes and best time.
 - On level select, the header shows the selected level's best scores. Solved
-  levels and the selected level are each shown in their own colour.
+  levels and the selected level are each shown in their own colour. The
+  bottom row shows how many levels are solved (`Solved: 000`, three digits
+  because all 100 can be solved).
 - The pause box (12×5) sits on columns 10–21, rows 10–14: centred on the
   board (8 board rows above, 9 below, as 5 rows cannot split 22 evenly).
   `pause.txt` draws the board as dots to show this.
 - When a level is solved, the top header line is highlighted and the game
   waits for fire, then returns to level select.
 - There is no undo, by design; Restart is the way out of a dead end.
+
+## Board graphics and animation
+
+The player is a bulldozer that pushes crates. Every move is animated: the
+bulldozer, and the crate it pushes, slide smoothly to the next tile. While
+sliding, a 16×16 sprite is not aligned to the 8×8 attribute grid, so the
+colour scheme is built to avoid clash:
+
+- The board's paper is black everywhere except on walls, and everything that
+  moves, plus targets, is drawn in ink. Black looks the same with and without
+  BRIGHT, so cells can freely mix bright and normal ink colours.
+- Colours: bulldozer and crates bright yellow, targets bright green, walls
+  red and white. Green also marks solved levels on level select and the
+  header when a level is solved; the selected level uses a colour that is
+  neither green nor yellow.
+- Walls can use any ink and paper: nothing ever moves into a wall tile.
+- The bulldozer and crates share one ink colour (yellow), which is the
+  floor cells' ink. Every cell's attribute therefore depends only on what
+  the board has there (floor, target, wall): board attributes are set when a
+  level is drawn and never change during play, and there is no clash.
+- Targets are an ink pattern (e.g. a dotted square) on black, inset from the
+  tile edges (e.g. pixels 2–13) so the bulldozer's blade never touches it.
+  Target cells always use the target ink colour (green), so a bulldozer or
+  crate turns green cell by cell as it slides onto a target, and back as it
+  slides off. A crate on a target is therefore shown by colour alone, with
+  no extra graphics.
+- A crate fills the whole 16×16 tile: mostly ink pixels, with its frame and
+  planks drawn as black (paper) lines, so it looks solid and two adjacent
+  crates show a 2-pixel seam.
+- The bulldozer has 4 rotations and faces the direction of its last move. Its
+  blade reaches the tile edge at the front, so it stays in contact with the
+  crate throughout a push. Its other sides keep a small margin.
+- The bulldozer and crate are both drawn as opaque 16×16 blocks: they
+  replace everything under them, including the target pattern (their colour
+  already shows they are on a target). There is no per-sprite mask data, and
+  one routine draws both.
+- Each animation frame builds the affected strip of tiles off-screen (at most
+  3 tiles: 48×16 or 16×48 pixels) and copies it to the screen just after the
+  frame interrupt: floor and target tiles first, then the crate and
+  bulldozer. Walking moves animate the same way as pushes.
+- Vertical movement keeps sprites byte-aligned. Horizontal movement shifts
+  them by a non-multiple of 8 pixels, so each row spans 3 bytes. The partly
+  covered first and last bytes are merged with the background using an edge
+  mask that depends only on the shift (e.g. `0xFF >> shift`).
 
 ## Controls
 
@@ -118,6 +170,8 @@ Record each choice here, and in `README.md` where it affects players, once
 it has been made:
 
 - Level data format
+- Animation speed: 2 pixels per frame (8 frames, 0.16 s per tile) or 1 pixel
+  per frame (16 frames, 0.32 s)
 - Whether to support 128K features (AY sound, extra memory)
 
 ## Conventions
