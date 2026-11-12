@@ -41,11 +41,14 @@ make clean    # removes build/
 ## Running
 
 Load `build/nightshift.tap` in a Spectrum emulator. Development uses
-[Fuse](https://fuse-emulator.sourceforge.net/); `make run` builds the game
-and starts it in Fuse as a 48K Spectrum.
+[ZEsarUX](https://github.com/chernandezba/zesarux); `make run` builds the
+game and starts it in ZEsarUX as a 48K Spectrum.
 
-On Ubuntu, install Fuse with
-`sudo apt install fuse-emulator-gtk spectrum-roms`.
+To set up ZEsarUX on Ubuntu 24.04, unpack the `ubuntu24_x86_64` build from
+its [releases](https://github.com/chernandezba/zesarux/releases) into
+`~/opt/zesarux-13.0` and install its one missing library with
+`sudo apt install libsdl1.2debian`. For another location, use
+`make run ZESARUX_DIR=/path/to/ZEsarUX-13.0`.
 On real hardware, load the tape with `LOAD ""`.
 
 ## License

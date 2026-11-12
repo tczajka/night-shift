@@ -1,7 +1,8 @@
 ASM     := sjasmplus
-FUSE    := fuse-gtk
-# Extra emulator options; override with e.g. make run FUSE_FLAGS="-g 4x".
-FUSE_FLAGS := -g 4x
+# ZEsarUX runs from its own directory, where its ROMs are.
+ZESARUX_DIR := $(HOME)/opt/zesarux-13.0/ZEsarUX-13.0
+# Extra emulator options; override with e.g. make run ZESARUX_FLAGS="--zoom 2".
+ZESARUX_FLAGS := --zoom 5 --realvideo --nowelcomemessage
 BUILD   := build
 TAP     := $(BUILD)/nightshift.tap
 SOURCES := $(wildcard src/*.asm)
@@ -39,7 +40,7 @@ $(BUILD):
 	mkdir -p $@
 
 run: $(TAP)
-	$(FUSE) --machine 48 $(FUSE_FLAGS) $(TAP)
+	cd $(ZESARUX_DIR) && ./zesarux --machine 48k $(ZESARUX_FLAGS) $(abspath $(TAP))
 
 clean:
 	rm -rf $(BUILD)

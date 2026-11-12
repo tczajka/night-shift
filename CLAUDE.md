@@ -9,9 +9,13 @@ in Z80 assembly. See `README.md` for the player-facing description.
 
 ## Toolchain and build
 
-- sjasmplus 1.24.0 (`/usr/local/bin/sjasmplus`); Fuse 1.6.0 (`fuse-gtk`).
+- sjasmplus 1.24.0 (`/usr/local/bin/sjasmplus`); ZEsarUX 13.0, unpacked in
+  `~/opt/zesarux-13.0/ZEsarUX-13.0` (needs `libsdl1.2debian`). Fuse is not
+  used: its window kept stale pixels after the screen was cleared.
 - `make` builds `build/nightshift.tap` (plus `.sym` and `.lst`); `make run`
-  runs it in Fuse (`FUSE_FLAGS` to override options); `make clean`.
+  runs it in ZEsarUX (`ZESARUX_FLAGS`, `ZESARUX_DIR` to override);
+  `make clean`. `--realvideo` makes border colour changes show at their
+  real timing, which border profiling needs.
 - `make PROFILE=1` (or `make run PROFILE=1`) defines `PROFILE`, enabling
   the `PROFILE_BORDER` colour markers from `src/profile.asm`.
 - The assembler flags make warnings errors: a build must produce none.
@@ -100,8 +104,8 @@ slides smoothly to the next tile, so sprites are often not aligned to the
   the ports itself.
 - Fire chooses a level, opens the pause menu, confirms a menu item, and
   leaves the solved-level screen.
-- In Fuse, `FUSE_FLAGS="-g 4x --kempston --joystick-keyboard-output 2"` sends
-  Q/A/O/P/Space through the Kempston interface instead of as keys.
+- To test the Kempston path, ZEsarUX can emulate a Kempston joystick
+  (`--joystickemulated Kempston`).
 
 ## Open decisions
 
