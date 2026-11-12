@@ -12,10 +12,9 @@
 code_start:
 
 start:
-    ld sp,Memory.stack_top     ; leave the BASIC stack; no return to BASIC
-    PROFILE_BORDER 1            ; blue: initialization
+    halt                        ; initialize on the screen border
+    ld sp,Memory.stack_top      ; leave the BASIC stack; no return to BASIC
     call Interrupt.init
-    PROFILE_BORDER 0
 .loop:
     halt                        ; wait for the next frame interrupt
     jr .loop
