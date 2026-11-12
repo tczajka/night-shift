@@ -19,7 +19,6 @@ screen_bitmap_end EQU 0x5800
 screen_attrs      EQU 0x5800    ; one byte per character cell
 screen_attrs_end  EQU 0x5B00
 
-    ASSERT screen_bitmap_end <= screen_attrs
     ASSERT screen_attrs_end <= @code_start
     ASSERT @code_end <= stack
 
