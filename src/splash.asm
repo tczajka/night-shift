@@ -4,7 +4,7 @@
     MODULE Splash
 
 start:
-    halt                        ; sync to frame
+    halt                        ; sync to frame, whatever happened previously
     call @Input.get_pressed     ; ignore presses from before the splash
 .wait:
     halt
