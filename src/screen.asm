@@ -90,6 +90,26 @@ print_string:
     djnz .char
     ret
 
+; Draw a 2-digit binary coded decimal number from the ROM font.
+; Leaves attributes unchanged.
+; Entry: A = number in BCD (0x00-0x99), DE = address of the first digit's
+; cell (see char_address).
+; Exit: DE = address of the cell after the number (see print_char).
+; Clobbers: A, B, HL.
+print_bcd:
+    push af
+    rrca                        ; high digit
+    rrca
+    rrca
+    rrca
+    and 0x0F
+    add a,'0'
+    call print_char
+    pop af
+    and 0x0F                    ; low digit
+    add a,'0'
+    jp print_char
+
 ; Bitmap address of the top pixel line of a character cell. The cell's other
 ; 7 lines follow at D + 1 ... D + 7, with E unchanged.
 ; Entry: B = row (0-23), C = column (0-31).
