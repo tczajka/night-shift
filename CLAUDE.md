@@ -165,18 +165,18 @@ colour scheme is built to avoid clash:
 
 Two inputs, both active at once when present:
 
-- Cursor keys, which also covers the cursor (Protek/AGF) joystick:
-  directions are keys 5 ← 6 ↓ 7 ↑ 8 →, fire is 0. Always active.
+- Keys Q ↑ A ↓ O ← P →, Space for fire. Always active.
 - A Kempston joystick, if one is detected when the game starts.
 
-No Sinclair joysticks (including the built-in ports on the +2/+2A/+3) and no
-redefinable keys. A Sinclair 2 joystick presses keys 6–0 with different
-meanings from the cursor keys, so it would give scrambled directions.
+No other keys, no redefinable keys, and no cursor or Sinclair joysticks
+(including the built-in ports on the +2/+2A/+3): those press number keys,
+which the game ignores. The Spectrum+'s arrow keys (Caps Shift + 5–8) are
+not used either.
 
-- Read the keys from half-rows 0xF7FE (bit 4 = 5) and 0xEFFE (bit 0 = 0,
-  bit 1 = 9, bit 2 = 8, bit 3 = 7, bit 4 = 6); a pressed key reads as 0.
-  Ignore Caps Shift, so both 5–8 and Caps Shift + 5–8 (what the dedicated
-  cursor keys on the Spectrum+ and later models send) work.
+- Read the keys from half-rows 0xFBFE (bit 0 = Q), 0xFDFE (bit 0 = A),
+  0xDFFE (bit 0 = P, bit 1 = O) and 0x7FFE (bit 0 = Space); a pressed key
+  reads as 0. Ignore the other bits: those half-rows also hold W–T, S–G,
+  Y/U/I, and Symbol Shift/M/N/B.
 - The Kempston interface is read from port 31 (0x1F). A pressed input reads
   as 1: bit 0 right, bit 1 left, bit 2 down, bit 3 up, bit 4 fire; bits 5–7
   are 0.
@@ -194,6 +194,10 @@ meanings from the cursor keys, so it would give scrambled directions.
 - Fire chooses a level on level select, opens the pause menu during play,
   confirms the selected pause-menu item, and leaves the solved-level
   screen.
+- Testing in Fuse: Q/A/O/P/Space reach the game as keys by default. With
+  `FUSE_FLAGS="-g 3x --kempston --joystick-keyboard-output 2"` Fuse captures
+  the same keys and sends them through its emulated Kempston interface
+  instead, which tests the joystick path.
 
 ## Open decisions
 

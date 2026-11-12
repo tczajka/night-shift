@@ -17,19 +17,17 @@ Early development. There is nothing to build or play yet.
 
 ## Controls
 
-Cursor keys, a cursor (Protek/AGF) joystick, or a Kempston joystick:
+Keyboard, or a Kempston joystick:
 
 | Key | Action |
 | --- | --- |
-| 5 / 6 / 7 / 8 | Left / down / up / right |
-| 0 | Fire: choose a level, pause, confirm |
-
-Caps Shift is optional, so the cursor keys work both as plain 5–8 and as
-Caps Shift + 5–8 (the dedicated cursor keys on later models).
+| Q / A / O / P | Up / down / left / right |
+| Space | Fire: choose a level, pause, confirm |
 
 A Kempston interface is detected automatically when the game starts; the
-keyboard keeps working alongside it. Sinclair joysticks, including the
-built-in joystick ports of the +2, +2A and +3, are not supported.
+keyboard keeps working alongside it. Cursor and Sinclair joysticks,
+including the built-in joystick ports of the +2, +2A and +3, are not
+supported.
 
 ## Building
 
