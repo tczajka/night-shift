@@ -22,9 +22,12 @@ in Z80 assembly. See `README.md` for the player-facing description.
   inside routines.
 - All game code and data go between `code_start` and `code_end` in
   `main.asm`: only that range is saved to tape.
-- `memory.asm` is included before the code so its labels are defined before
-  use; otherwise sjasmplus leaves bogus `<Module>.Memory.*` symbols. Areas
-  reserved there take no tape space.
+- Includes follow memory order: code, then `memory.asm` (reserved areas
+  above the code, which take no tape space), then `tape.asm` last.
+- Refer to labels in other modules with `@` (e.g. `@Memory.stack_top`).
+  It is required inside a `MODULE`: there a plain reference to a label
+  defined later is first taken as module-local, which leaves bogus
+  `<Module>.<Other>.*` symbols in the symbol file.
 - sjasmplus does not detect overlapping `ORG` regions: every `ORG` in
   `Memory` needs an `ASSERT $ <= <label of the next region>` before it.
 - Add binary files to the Makefile dependencies when introducing `INCBIN`.

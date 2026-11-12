@@ -12,26 +12,26 @@
 
     MODULE Interrupt
 
-VECTOR_BYTE EQU Memory.interrupt_entry & 0xFF
+VECTOR_BYTE EQU @Memory.interrupt_entry & 0xFF
 
-    ASSERT Memory.interrupt_vectors >= 0x8000
-    ASSERT (Memory.interrupt_vectors & 0xFF) == 0
-    ASSERT Memory.interrupt_entry >> 8 == VECTOR_BYTE
+    ASSERT @Memory.interrupt_vectors >= 0x8000
+    ASSERT (@Memory.interrupt_vectors & 0xFF) == 0
+    ASSERT @Memory.interrupt_entry >> 8 == VECTOR_BYTE
 
 ; Install the handler and enable interrupts in IM 2.
 ; Entry: none.  Exit: interrupts enabled.  Clobbers: A, BC, DE, HL.
 init:
     di
-    ld hl,Memory.interrupt_vectors
-    ld de,Memory.interrupt_vectors + 1
+    ld hl,@Memory.interrupt_vectors
+    ld de,@Memory.interrupt_vectors + 1
     ld bc,256
     ld (hl),VECTOR_BYTE
     ldir                        ; fill all 257 bytes
     ld a,0xC3                   ; JP nn
-    ld (Memory.interrupt_entry),a
+    ld (@Memory.interrupt_entry),a
     ld hl,handler
-    ld (Memory.interrupt_entry + 1),hl
-    ld a,Memory.interrupt_vectors >> 8
+    ld (@Memory.interrupt_entry + 1),hl
+    ld a,@Memory.interrupt_vectors >> 8
     ld i,a
     im 2
     ei

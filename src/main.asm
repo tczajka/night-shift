@@ -3,8 +3,6 @@
 
     DEVICE ZXSPECTRUM48
 
-    INCLUDE "memory.asm"
-
     ORG 0x8000                  ; above contended memory
 
 ; Everything between code_start and code_end is saved to tape as one CODE
@@ -12,14 +10,13 @@
 code_start:
 
 start:
-    ld sp,Memory.stack_top      ; leave the BASIC stack; no return to BASIC
+    ld sp,Memory.stack_top     ; leave the BASIC stack; no return to BASIC
     call Interrupt.init
 .loop:
     halt                        ; wait for the next frame interrupt
     jr .loop
 
     INCLUDE "interrupt.asm"
-
 code_end:
-
+    INCLUDE "memory.asm"
     INCLUDE "tape.asm"
