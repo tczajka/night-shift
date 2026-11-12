@@ -11,7 +11,7 @@
 ;   FF58-FFFF  BASIC
 ;
 
-    MODULE Memory
+    MODULE Alloc
 
 ; Screen memory.
 screen_bitmap     EQU 0x4000    ; see Screen for the line order

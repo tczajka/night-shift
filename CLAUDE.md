@@ -29,12 +29,12 @@ in Z80 assembly. See `README.md` for the player-facing description.
 - All game code and data go between `code_start` and `code_end` in
   `main.asm`: only that range is saved to tape.
 - Includes: macro-only files (`profile.asm`) first, then the code, then
-  `memory.asm` (constants only), then `tape.asm` last.
-- Refer to labels in other modules with `@` (e.g. `@Memory.stack_top`).
+  `alloc.asm` (constants only), then `tape.asm` last.
+- Refer to labels in other modules with `@` (e.g. `@Alloc.stack_top`).
   It is required inside a `MODULE`: there a plain reference to a label
   defined later is first taken as module-local, which leaves bogus
   `<Module>.<Other>.*` symbols in the symbol file.
-- `Memory` names every fixed RAM area with `EQU`. When adding one, add an
+- `Alloc` names every fixed RAM area with `EQU`. When adding one, add an
   `ASSERT` that it ends before the next area starts.
 - Add binary files to the Makefile dependencies when introducing `INCBIN`.
 - Comment non-obvious routines with register usage on entry and exit, plus

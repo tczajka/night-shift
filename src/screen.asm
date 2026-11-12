@@ -26,14 +26,14 @@ BRIGHT      EQU 0x40
 ; clearing the bitmap then takes about two frames.
 ; Entry: A = attribute.  Exit: none.  Clobbers: BC, DE, HL.
 clear:
-    ld hl,@Memory.screen_attrs
-    ld de,@Memory.screen_attrs + 1
-    ld bc,@Memory.screen_attrs_end - @Memory.screen_attrs - 1
+    ld hl,@Alloc.screen_attrs
+    ld de,@Alloc.screen_attrs + 1
+    ld bc,@Alloc.screen_attrs_end - @Alloc.screen_attrs - 1
     ld (hl),a
     ldir
-    ld hl,@Memory.screen_bitmap
-    ld de,@Memory.screen_bitmap + 1
-    ld bc,@Memory.screen_bitmap_end - @Memory.screen_bitmap - 1
+    ld hl,@Alloc.screen_bitmap
+    ld de,@Alloc.screen_bitmap + 1
+    ld bc,@Alloc.screen_bitmap_end - @Alloc.screen_bitmap - 1
     ld (hl),0
     ldir
     ret
@@ -123,7 +123,7 @@ print_string:
 char_address:
     ld a,b                      ; D = 0x40 | (row & 0x18)
     and 0x18
-    or @Memory.screen_bitmap >> 8
+    or @Alloc.screen_bitmap >> 8
     ld d,a
     ld a,b                      ; E = (row & 7) << 5 | column
     and 7

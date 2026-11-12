@@ -13,7 +13,7 @@ code_start:
 
 start:
     halt                        ; initialize on the screen border
-    ld sp,Memory.stack_top      ; leave the BASIC stack; no return to BASIC
+    ld sp,Alloc.stack_top       ; leave the BASIC stack; no return to BASIC
     call Interrupt.init
     call Input.init
     jp Splash.start
@@ -25,5 +25,5 @@ start:
     INCLUDE "splash.asm"
     INCLUDE "level_select.asm"
 code_end:
-    INCLUDE "memory.asm"
+    INCLUDE "alloc.asm"
     INCLUDE "tape.asm"

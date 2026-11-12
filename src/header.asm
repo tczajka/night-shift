@@ -7,7 +7,7 @@
 ; right just adds to E.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 print_labels:
-    ld de,@Memory.screen_bitmap ; row 0, column 0
+    ld de,@Alloc.screen_bitmap  ; row 0, column 0
     ld hl,level_text
     ld b,LEVEL_TEXT_LEN
     call @Screen.print_string
