@@ -35,6 +35,6 @@ interrupt_entry EQU 0xFDFD
 ; IM 2 vector table: 257 bytes, all equal to the low byte of
 ; interrupt_entry. Must start on a 256-byte boundary.
 interrupt_vectors     EQU 0xFE00
-interrupt_vectors_end EQU interrupt_vectors + 257
+interrupt_vectors_end EQU 0xFF01
 
     ENDMODULE
