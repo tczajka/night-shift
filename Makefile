@@ -3,6 +3,7 @@ FUSE    := fuse-gtk
 BUILD   := build
 TAP     := $(BUILD)/nightshift.tap
 SOURCES := $(wildcard src/*.asm)
+IMAGES  := images/load.scr
 
 # Stricter parsing, warnings as errors (see sjasmplus --help=syntax), and all
 # optional warnings.
@@ -12,7 +13,7 @@ ASMFLAGS := --syntax=abfw -Wall
 
 all: $(TAP)
 
-$(TAP): $(SOURCES) | $(BUILD)
+$(TAP): $(SOURCES) $(IMAGES) | $(BUILD)
 	$(ASM) $(ASMFLAGS) --nologo --msg=war --outprefix=$(BUILD)/ \
 		--sym=$(BUILD)/nightshift.sym --lst=$(BUILD)/nightshift.lst \
 		src/main.asm

@@ -64,13 +64,22 @@ must produce no warnings.
 
 ## Tape and memory
 
-`src/tape.asm` (included last) builds the tape from two blocks:
+`src/tape.asm` (included last) builds the tape from three blocks:
 
 1. A BASIC program, autostarting at line 10:
-   `10 CLEAR VAL "32767": LOAD "" CODE : RANDOMIZE USR VAL "32768"`.
+   `10 BORDER VAL "0": PAPER VAL "0": INK VAL "7": CLEAR VAL "32767":
+   POKE VAL "23739",VAL "111": LOAD "" SCREEN$ : LOAD "" CODE :
+   RANDOMIZE USR VAL "32768"`.
    Its tokenized bytes are assembled at PROG (0x5CCB) only so `SAVETAP` can
    write them.
-2. A CODE block with `code_start`..`code_end`, loaded at 0x8000.
+2. The loading screen, `images/load.scr` (6912 bytes, loaded at 0x4000 by
+   `LOAD "" SCREEN$`).
+3. A CODE block with `code_start`..`code_end`, loaded at 0x8000.
+
+`POKE 23739,111` points channel S's output routine at 0x096F, a `RET` in the
+ROM, so the "Bytes: ..." messages printed when each header loads don't
+overwrite the bottom of the loading screen. The game must therefore not
+print through ROM channel S (it draws to the screen directly anyway).
 
 `CLEAR 32767` puts RAMTOP, and therefore the BASIC stack used when the game
 starts, just below the code. The two addresses in the BASIC line are text,
@@ -89,7 +98,8 @@ Decisions not visible in them:
   screen memory, so the game just waits for fire and then goes to level
   select. The GitHub URL is part of the picture, on the bottom character row
   (centred, columns 1–30), kept clear of the art so its attributes don't
-  clash. Not implemented yet: the tape has no screen block so far.
+  clash. `images/load.scr` is the screen file itself (edited directly, not
+  generated).
 - 100 levels, numbered 00–99.
 - The board is 16×11 tiles of 16×16 pixels (2×2 character cells each), below
   two header rows. See "Board graphics and animation" for how it is drawn.
