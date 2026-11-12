@@ -163,14 +163,34 @@ colour scheme is built to avoid clash:
 
 ## Controls
 
-Cursor keys and the cursor (Protek/AGF) joystick only: directions are keys
-5 ← 6 ↓ 7 ↑ 8 →, fire is 0. No other joystick interfaces or redefinable
-keys.
+Two inputs, both active at once when present:
+
+- Cursor keys, which also covers the cursor (Protek/AGF) joystick:
+  directions are keys 5 ← 6 ↓ 7 ↑ 8 →, fire is 0. Always active.
+- A Kempston joystick, if one is detected when the game starts.
+
+No Sinclair joysticks (including the built-in ports on the +2/+2A/+3) and no
+redefinable keys. A Sinclair 2 joystick presses keys 6–0 with different
+meanings from the cursor keys, so it would give scrambled directions.
 
 - Read the keys from half-rows 0xF7FE (bit 4 = 5) and 0xEFFE (bit 0 = 0,
   bit 1 = 9, bit 2 = 8, bit 3 = 7, bit 4 = 6); a pressed key reads as 0.
   Ignore Caps Shift, so both 5–8 and Caps Shift + 5–8 (what the dedicated
   cursor keys on the Spectrum+ and later models send) work.
+- The Kempston interface is read from port 31 (0x1F). A pressed input reads
+  as 1: bit 0 right, bit 1 left, bit 2 down, bit 3 up, bit 4 fire; bits 5–7
+  are 0.
+- Use the Kempston layout (bits 0–4, 1 = pressed) as the game's internal
+  input format: convert the keys into it and OR in the Kempston value when
+  the interface is present.
+- Detection, once at startup: read port 31 right after `halt`, while the
+  beam is in the top border. With no interface the bus is idle there and
+  reads 0xFF (48K/128K floating bus; the +2A/+3 also read 0xFF), so bits 5–7
+  are set; a Kempston interface returns them as 0. Treat it as present only
+  if bits 5–7 are 0 on several consecutive frames.
+- Never read port 31 without a detected interface: during the display
+  period a 48K returns whatever screen byte the ULA is fetching, which looks
+  like random presses.
 - Fire chooses a level on level select, opens the pause menu during play,
   confirms the selected pause-menu item, and leaves the solved-level
   screen.
