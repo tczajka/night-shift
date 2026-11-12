@@ -12,6 +12,8 @@ in Z80 assembly. See `README.md` for the player-facing description.
 - sjasmplus 1.24.0 (`/usr/local/bin/sjasmplus`); Fuse 1.6.0 (`fuse-gtk`).
 - `make` builds `build/nightshift.tap` (plus `.sym` and `.lst`); `make run`
   runs it in Fuse (`FUSE_FLAGS` to override options); `make clean`.
+- `make PROFILE=1` (or `make run PROFILE=1`) defines `PROFILE`, enabling
+  the `PROFILE_BORDER` colour markers from `src/profile.asm`.
 - The assembler flags make warnings errors: a build must produce none.
 - Plain `make` only rebuilds on newer timestamps; use `make -B` to be sure.
 
@@ -24,6 +26,7 @@ in Z80 assembly. See `README.md` for the player-facing description.
   `main.asm`: only that range is saved to tape.
 - Includes follow memory order: code, then `memory.asm` (reserved areas
   above the code, which take no tape space), then `tape.asm` last.
+  Files that only define macros (`profile.asm`) come first.
 - Refer to labels in other modules with `@` (e.g. `@Memory.stack_top`).
   It is required inside a `MODULE`: there a plain reference to a label
   defined later is first taken as module-local, which leaves bogus

@@ -3,6 +3,8 @@
 
     DEVICE ZXSPECTRUM48
 
+    INCLUDE "profile.asm"         ; macros only, no code
+
     ORG 0x8000                  ; above contended memory
 
 ; Everything between code_start and code_end is saved to tape as one CODE
@@ -11,7 +13,9 @@ code_start:
 
 start:
     ld sp,Memory.stack_top     ; leave the BASIC stack; no return to BASIC
+    PROFILE_BORDER 1            ; blue: initialization
     call Interrupt.init
+    PROFILE_BORDER 0
 .loop:
     halt                        ; wait for the next frame interrupt
     jr .loop

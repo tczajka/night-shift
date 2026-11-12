@@ -7,18 +7,33 @@ TAP     := $(BUILD)/nightshift.tap
 SOURCES := $(wildcard src/*.asm)
 IMAGES  := images/load.scr
 
-# Stricter parsing, warnings as errors (see sjasmplus --help=syntax), and all
-# optional warnings.
-ASMFLAGS := --syntax=abfw -Wall
+# Stricter parsing, warnings as errors, whole-word-only DEFINE substitution
+# (see sjasmplus --help=syntax), and all optional warnings.
+ASMFLAGS := --syntax=abfsw -Wall
 
-.PHONY: all run clean
+# make PROFILE=1 assembles the profiling aids in src/profile.asm.
+ifdef PROFILE
+ASMFLAGS += -DPROFILE
+endif
+
+# Rebuild when ASMFLAGS change (e.g. switching PROFILE on or off): the
+# flags file is rewritten only when its contents would differ.
+FLAGS_FILE := $(BUILD)/asmflags
+
+.PHONY: all run clean FORCE
+
+# Don't leave a tape behind when assembly fails.
+.DELETE_ON_ERROR:
 
 all: $(TAP)
 
-$(TAP): $(SOURCES) $(IMAGES) | $(BUILD)
+$(TAP): $(SOURCES) $(IMAGES) $(FLAGS_FILE) | $(BUILD)
 	$(ASM) $(ASMFLAGS) --nologo --msg=war --outprefix=$(BUILD)/ \
 		--sym=$(BUILD)/nightshift.sym --lst=$(BUILD)/nightshift.lst \
 		src/main.asm
+
+$(FLAGS_FILE): FORCE | $(BUILD)
+	@echo '$(ASMFLAGS)' | cmp -s - $@ || echo '$(ASMFLAGS)' > $@
 
 $(BUILD):
 	mkdir -p $@
