@@ -23,10 +23,9 @@ VECTOR_BYTE EQU @Alloc.interrupt_entry & 0xFF
 init:
     di
     ld hl,@Alloc.interrupt_vectors
-    ld de,@Alloc.interrupt_vectors + 1
-    ld bc,256
-    ld (hl),VECTOR_BYTE
-    ldir                        ; fill all 257 bytes
+    ld bc,@Alloc.interrupt_vectors_end - @Alloc.interrupt_vectors
+    ld a,VECTOR_BYTE
+    call @Memory.fill           ; fill all 257 bytes
     ld a,0xC3                   ; JP nn
     ld (@Alloc.interrupt_entry),a
     ld hl,handler

@@ -23,10 +23,10 @@ screen_attrs_end  EQU 0x5B00
     ASSERT screen_attrs_end <= @code_start
     ASSERT @code_end <= stack
 
-; Stack: SP starts at stack_top (set by `start`) and grows down towards
+; Stack: SP starts at stack_end (set by `start`) and grows down towards
 ; stack. Uncontended memory, so pushes and calls run at full speed.
 stack           EQU 0xE000
-stack_top       EQU 0xFD00
+stack_end       EQU 0xFD00
 
 ; JP to the interrupt handler (3 bytes). Its address must be the same byte
 ; twice, because every IM 2 vector in the table reads as that address.
