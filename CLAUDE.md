@@ -24,15 +24,14 @@ in Z80 assembly. See `README.md` for the player-facing description.
   inside routines.
 - All game code and data go between `code_start` and `code_end` in
   `main.asm`: only that range is saved to tape.
-- Includes follow memory order: code, then `memory.asm` (reserved areas
-  above the code, which take no tape space), then `tape.asm` last.
-  Files that only define macros (`profile.asm`) come first.
+- Includes: macro-only files (`profile.asm`) first, then the code, then
+  `memory.asm` (constants only), then `tape.asm` last.
 - Refer to labels in other modules with `@` (e.g. `@Memory.stack_top`).
   It is required inside a `MODULE`: there a plain reference to a label
   defined later is first taken as module-local, which leaves bogus
   `<Module>.<Other>.*` symbols in the symbol file.
-- sjasmplus does not detect overlapping `ORG` regions: every `ORG` in
-  `Memory` needs an `ASSERT $ <= <label of the next region>` before it.
+- `Memory` names every fixed RAM area with `EQU`. When adding one, add an
+  `ASSERT` that it ends before the next area starts.
 - Add binary files to the Makefile dependencies when introducing `INCBIN`.
 - Comment non-obvious routines with register usage on entry and exit, plus
   the registers they clobber.
@@ -57,8 +56,7 @@ in Z80 assembly. See `README.md` for the player-facing description.
 with the code. Decisions not visible in them:
 
 - The loading screen (`images/load.scr`, edited directly, not generated)
-  doubles as the splash screen: when the code starts it is still on screen,
-  so the game waits for fire, then goes to level select.
+  doubles as the splash screen (`src/splash.asm`).
 - 100 levels, numbered 00–99. The board is 16×11 tiles of 16×16 pixels.
 - The game counts pushes (not moves) and time. "Best" is each level's best
   pushes and best time; level select's header shows the selected level's.

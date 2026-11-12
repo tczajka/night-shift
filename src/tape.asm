@@ -61,11 +61,11 @@ basic_end:
 
 ; Loading screen: bitmap and attributes, loaded straight into screen memory
 ; by LOAD "" SCREEN$.
-    ORG 0x4000
+    ORG @Memory.screen_bitmap
 screen:
     INCBIN "../images/load.scr"
 screen_end:
-    ASSERT screen_end - screen == 6912
+    ASSERT screen_end - screen == @Memory.screen_attrs_end - @Memory.screen_bitmap
 
     EMPTYTAP "nightshift.tap"
     SAVETAP "nightshift.tap", BASIC, "NightShift", basic, basic_end - basic, 10
