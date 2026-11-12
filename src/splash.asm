@@ -4,6 +4,7 @@
     MODULE Splash
 
 start:
+    halt
     call @Input.get_pressed     ; ignore presses from before the splash
 .wait:
     halt
