@@ -21,7 +21,7 @@ start:
     ld b,SOLVED_TEXT_LEN
     call @Screen.print_string
 
-    halt                        ; drawing time varies: resync to the frame
+    halt                        ; wait until the finished screen is shown
     call @Input.get_pressed     ; ignore presses made while drawing
 .loop:
     halt

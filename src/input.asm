@@ -40,6 +40,8 @@ init:
     djnz .detect
     dec a                       ; A was 0: now 0xFF
     ld (kempston),a
+    ld a,ALL                    ; the joystick hasn't been scanned: treat
+    ld (held),a                 ; everything as held, like at startup
     ret
 
 ; Read the keys and, if present, the Kempston joystick; update `held` and
@@ -123,7 +125,9 @@ get_pressed:
     ld (hl),0
     ret
 
-held:       DB 0                ; inputs held now
+; Starts as all held, so inputs held at startup don't count as pressed
+; until they are released and pressed again.
+held:       DB ALL              ; inputs held now
 pressed:    DB 0                ; inputs pressed since the last get_pressed
 kempston:   DB 0                ; 0xFF if a Kempston interface was detected
 
