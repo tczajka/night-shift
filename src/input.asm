@@ -112,14 +112,14 @@ scan:
 
 ; Return the inputs pressed since the previous call, and clear `pressed`.
 ;
-; Interrupts stay enabled: disabling them, even briefly, can drop a frame
-; interrupt. A press added by `scan` between the read and the clear is lost;
-; calling this right after `halt` makes that practically impossible.
+; If this is called exactly between frames, a key press may be lost.
 ;
 ; Entry: none.  Exit: A = pressed inputs.  Clobbers: HL.
 get_pressed:
     ld hl,pressed
     ld a,(hl)
+    ; If the frame interrupt fires here, `scan` adds new presses to
+    ; `pressed`, and the next instruction clears them unseen: they are lost.
     ld (hl),0
     ret
 
