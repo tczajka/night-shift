@@ -38,24 +38,13 @@ clear:
     ldir
     ret
 
-; Draw a character from the ROM font in a character cell. Leaves the cell's
-; attribute unchanged.
-; Entry: A = character (32-127), B = row (0-23), C = column (0-31).
-; Exit: DE = address of the next cell to the right (see print_char_addr).
-; Clobbers: A, B, HL.
-print_char:
-    ld l,a                      ; char_address clobbers A
-    call char_address
-    ld a,l
-    ; fall through
-
 ; Draw a character from the ROM font at a bitmap address. Leaves the cell's
 ; attribute unchanged.
 ; Entry: A = character (32-127), DE = address of the cell's top pixel line
 ; (see char_address).
 ; Exit: DE = address of the next cell to the right.
 ; Clobbers: A, B, HL.
-print_char_addr:
+print_char:
     ld l,a                      ; HL = FONT + A * 8
     ld h,0
     add hl,hl
@@ -80,25 +69,13 @@ print_char_addr:
     inc e                       ; next cell
     ret
 
-; Draw a string from the ROM font, left to right from a character cell.
-; Leaves attributes unchanged.
-; Entry: HL = string, A = length (0-255), B = row (0-23), C = column (0-31).
-; Exit: DE = address of the cell after the string (see print_char_addr).
-; Clobbers: A, B, HL.
-print_string:
-    push af
-    call char_address
-    pop af
-    ld b,a
-    ; fall through
-
 ; Draw a string from the ROM font, left to right from a bitmap address.
 ; Leaves attributes unchanged.
 ; Entry: HL = string, B = length (0-255), DE = address of the first cell's
 ; top pixel line (see char_address).
-; Exit: DE = address of the cell after the string (see print_char_addr).
+; Exit: DE = address of the cell after the string (see print_char).
 ; Clobbers: A, B, HL.
-print_string_addr:
+print_string:
     ld a,b
     or a
     ret z
@@ -106,7 +83,7 @@ print_string_addr:
     ld a,(hl)
     push hl
     push bc
-    call print_char_addr
+    call print_char
     pop bc
     pop hl
     inc hl

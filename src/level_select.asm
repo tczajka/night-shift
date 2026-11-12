@@ -9,14 +9,16 @@ start:
 
     call @Header.print_labels
 
-    ld hl,select_level_text
-    ld a,SELECT_LEVEL_TEXT_LEN
     ld bc,1 << 8 | 10           ; row 1, column 10
+    call @Screen.char_address
+    ld hl,select_level_text
+    ld b,SELECT_LEVEL_TEXT_LEN
     call @Screen.print_string
 
-    ld hl,solved_text
-    ld a,SOLVED_TEXT_LEN
     ld bc,23 << 8 | 10          ; row 23, column 10
+    call @Screen.char_address
+    ld hl,solved_text
+    ld b,SOLVED_TEXT_LEN
     call @Screen.print_string
 .loop:
     halt
