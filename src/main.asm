@@ -18,6 +18,7 @@ start:
     call Input.init
     jp Splash.start
 
+    INCLUDE "memory.asm"
     INCLUDE "interrupt.asm"
     INCLUDE "input.asm"
     INCLUDE "screen.asm"

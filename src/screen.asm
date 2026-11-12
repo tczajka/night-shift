@@ -24,19 +24,15 @@ BRIGHT      EQU 0x40
 ; Set every attribute to A, then clear the bitmap. The attributes go first
 ; and take under a third of a frame, so the colours change almost at once;
 ; clearing the bitmap then takes about two frames.
-; Entry: A = attribute.  Exit: none.  Clobbers: BC, DE, HL.
+; Entry: A = attribute.  Exit: none.  Clobbers: A, BC, DE, HL.
 clear:
     ld hl,@Alloc.screen_attrs
-    ld de,@Alloc.screen_attrs + 1
-    ld bc,@Alloc.screen_attrs_end - @Alloc.screen_attrs - 1
-    ld (hl),a
-    ldir
+    ld bc,@Alloc.screen_attrs_end - @Alloc.screen_attrs
+    call @Memory.fill
     ld hl,@Alloc.screen_bitmap
-    ld de,@Alloc.screen_bitmap + 1
-    ld bc,@Alloc.screen_bitmap_end - @Alloc.screen_bitmap - 1
-    ld (hl),0
-    ldir
-    ret
+    ld bc,@Alloc.screen_bitmap_end - @Alloc.screen_bitmap
+    xor a
+    jp @Memory.fill
 
 ; Draw a 2-digit binary coded decimal number from the ROM font.
 ; Leaves attributes unchanged.
