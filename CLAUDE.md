@@ -40,7 +40,8 @@ The project is new. See `README.md` for the player-facing description.
 - `make`: assemble `src/main.asm` into `build/nightshift.tap`, plus a
   symbol table (`build/nightshift.sym`) and listing
   (`build/nightshift.lst`).
-- `make run`: build, then run the tape in Fuse as a 48K machine.
+- `make run`: build, then run the tape in Fuse as a 48K machine, scaled 3x
+  (`FUSE_FLAGS`; e.g. `make run FUSE_FLAGS="-g 4x"`).
 - `make clean`: delete `build/`.
 
 The assembler runs with `--syntax=abfw -Wall` (`ASMFLAGS` in the Makefile):

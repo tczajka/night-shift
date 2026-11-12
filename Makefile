@@ -1,5 +1,7 @@
 ASM     := sjasmplus
 FUSE    := fuse-gtk
+# Extra emulator options; override with e.g. make run FUSE_FLAGS="-g 4x".
+FUSE_FLAGS := -g 4x
 BUILD   := build
 TAP     := $(BUILD)/nightshift.tap
 SOURCES := $(wildcard src/*.asm)
@@ -22,7 +24,7 @@ $(BUILD):
 	mkdir -p $@
 
 run: $(TAP)
-	$(FUSE) --machine 48 $(TAP)
+	$(FUSE) --machine 48 $(FUSE_FLAGS) $(TAP)
 
 clean:
 	rm -rf $(BUILD)
