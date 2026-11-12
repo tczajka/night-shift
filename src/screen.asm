@@ -41,16 +41,30 @@ clear:
 ; Draw a character from the ROM font in a character cell. Leaves the cell's
 ; attribute unchanged.
 ; Entry: A = character (32-127), B = row (0-23), C = column (0-31).
-; Exit: none.  Clobbers: A, B, DE, HL.
+; Exit: DE = address of the next cell to the right (see print_char_addr).
+; Clobbers: A, B, HL.
 print_char:
+    ld l,a                      ; char_address clobbers A
+    call char_address
+    ld a,l
+    ; fall through
+
+; Draw a character from the ROM font at a bitmap address. Leaves the cell's
+; attribute unchanged.
+; Entry: A = character (32-127), DE = address of the cell's top pixel line
+; (see char_address).
+; Exit: DE = address of the next cell to the right.
+; Clobbers: A, B, HL.
+print_char_addr:
     ld l,a                      ; HL = FONT + A * 8
     ld h,0
     add hl,hl
     add hl,hl
     add hl,hl
-    ld de,FONT
-    add hl,de
-    call char_address           ; DE = screen address
+    ASSERT (FONT & 0x3FF) == 0  ; A * 8 < 0x400, so OR adds FONT
+    ld a,h
+    or FONT >> 8
+    ld h,a
 
     ld b,8
 .line:
@@ -59,6 +73,11 @@ print_char:
     inc hl
     inc d                       ; next pixel line of the cell
     djnz .line
+
+    ld a,d                      ; back to the top line
+    sub 8
+    ld d,a
+    inc e                       ; next cell
     ret
 
 ; Bitmap address of the top pixel line of a character cell. The cell's other
