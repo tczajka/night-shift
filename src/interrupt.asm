@@ -37,9 +37,15 @@ init:
     ei
     ret
 
-; Frame interrupt, 50 times a second. Does nothing yet.
+; Frame interrupt, 50 times a second. Runs at the top of the frame, before
+; the ULA starts drawing the picture.
 ; Must preserve every register it uses.
 handler:
+    push af
+    push bc
+    call @Input.scan
+    pop bc
+    pop af
     ei
     reti
 

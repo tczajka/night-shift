@@ -43,6 +43,9 @@ in Z80 assembly. See `README.md` for the player-facing description.
 - The game never returns to BASIC: it replaces the stack and runs in IM 2.
 - The ROM's interrupt handler doesn't run, so FRAMES and the ROM keyboard
   variables don't update; IY is free.
+- Never disable interrupts after initialization: the ULA holds the frame
+  interrupt for only ~32 T-states, so a `di` at that moment drops the
+  frame's interrupt and the game's timing with it.
 - The tape loader disables ROM printing to the main screen (channel S), so
   the game must draw to the screen directly.
 - The BASIC loader's addresses are text; `tape.asm` asserts they match the
@@ -92,18 +95,14 @@ slides smoothly to the next tile, so sprites are often not aligned to the
 
 ## Controls
 
-- Q ↑ A ↓ O ← P →, Space for fire, always active; plus a Kempston joystick
-  if detected at startup. No other keys or joysticks.
-- Internally, input uses the Kempston layout (bits 0–4 right, left, down,
-  up, fire; 1 = pressed): convert the keys into it and OR in the Kempston
-  value.
-- Kempston detection: read port 31 right after `halt` (top border). With no
-  interface it reads 0xFF; a Kempston returns bits 5–7 as 0. Require that on
-  several consecutive frames. Never read port 31 otherwise without an
-  interface: on a 48K it returns screen bytes during the display.
+- Q ↑ A ↓ O ← P →, Space for fire, plus a Kempston joystick if detected at
+  startup (`src/input.asm`). No other keys or joysticks.
+- Game code reads `Input.held` and takes new presses with
+  `Input.get_pressed` (both fed by the frame interrupt); it never reads
+  the ports itself.
 - Fire chooses a level, opens the pause menu, confirms a menu item, and
   leaves the solved-level screen.
-- In Fuse, `FUSE_FLAGS="-g 3x --kempston --joystick-keyboard-output 2"` sends
+- In Fuse, `FUSE_FLAGS="-g 4x --kempston --joystick-keyboard-output 2"` sends
   Q/A/O/P/Space through the Kempston interface instead of as keys.
 
 ## Open decisions

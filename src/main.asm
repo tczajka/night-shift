@@ -15,11 +15,13 @@ start:
     halt                        ; initialize on the screen border
     ld sp,Memory.stack_top      ; leave the BASIC stack; no return to BASIC
     call Interrupt.init
+    call Input.init
 .loop:
     halt                        ; wait for the next frame interrupt
     jr .loop
 
     INCLUDE "interrupt.asm"
+    INCLUDE "input.asm"
 code_end:
     INCLUDE "memory.asm"
     INCLUDE "tape.asm"
