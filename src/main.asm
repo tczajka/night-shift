@@ -12,7 +12,7 @@
 code_start:
 
 start:
-    halt                        ; initialize on the screen border
+    di                          ; until initialized; the splash enables them
     ld sp,Alloc.stack_end       ; leave the BASIC stack; no return to BASIC
     call Interrupt.init
     jp Splash.start

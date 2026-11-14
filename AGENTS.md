@@ -46,9 +46,6 @@ in Z80 assembly. See `README.md` for the player-facing description.
 - The game never returns to BASIC: it replaces the stack and runs in IM 2.
 - The ROM's interrupt handler doesn't run, so FRAMES and the ROM keyboard
   variables don't update; IY is free.
-- Never disable interrupts after initialization: the ULA holds the frame
-  interrupt for only ~32 T-states, so a `di` at that moment drops the
-  frame's interrupt and the game's timing with it.
 - The tape loader disables ROM printing to the main screen (channel S), so
   the game must draw to the screen directly.
 - The BASIC loader's addresses are text; `tape.asm` asserts they match the

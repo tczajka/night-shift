@@ -4,8 +4,8 @@
     MODULE Splash
 
 start:
-    halt                        ; sync to frame, whatever happened previously
-    call @Input.get_pressed     ; ignore presses from before the splash
+    call @Input.reset           ; ignore inputs held from before the splash
+    ei                          ; initialization done: start scanning input
 .wait:
     halt
     call @Input.get_pressed

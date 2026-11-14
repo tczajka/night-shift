@@ -90,6 +90,17 @@ scan:
     ld (held),a
     ret
 
+; Forget all inputs: treat every input as held, so one down now counts as
+; pressed only after it is released and pressed again, and clear `pressed`.
+; Call with interrupts disabled, before enabling them for a new screen.
+; Entry: none.  Exit: none.  Clobbers: A.
+reset:
+    ld a,ALL
+    ld (held),a
+    xor a
+    ld (pressed),a
+    ret
+
 ; Return the inputs pressed since the previous call, and clear `pressed`.
 ;
 ; If this is called exactly between frames, a key press may be lost.
@@ -103,9 +114,7 @@ get_pressed:
     ld (hl),0
     ret
 
-; Starts as all held, so inputs held at startup don't count as pressed
-; until they are released and pressed again.
-held:       DB ALL              ; inputs held now
+held:       DB 0                ; inputs held now (see reset)
 pressed:    DB 0                ; inputs pressed since the last get_pressed
 
     ENDMODULE

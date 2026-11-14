@@ -1,9 +1,9 @@
-; Level select screen (design/level-choice.txt).
+; Level select screen (design/level-select.txt).
 
     MODULE LevelSelect
 
 start:
-    halt                        ; start clearing at the top of a frame
+    di                          ; draw without frame interrupts
     ld a,@Screen.WHITE | @Screen.BLACK << 3 | @Screen.BRIGHT
     call @Screen.clear
 
@@ -21,8 +21,8 @@ start:
     ld b,SOLVED_TEXT_LEN
     call @Screen.print_string
 
-    halt                        ; wait until the finished screen is shown
-    call @Input.get_pressed     ; ignore presses made while drawing
+    call @Input.reset           ; ignore inputs from before the finished screen
+    ei
 .loop:
     halt
     jr .loop

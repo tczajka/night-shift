@@ -18,10 +18,10 @@ VECTOR_BYTE EQU @Alloc.interrupt_entry & 0xFF
     ASSERT (@Alloc.interrupt_vectors & 0xFF) == 0
     ASSERT @Alloc.interrupt_entry >> 8 == VECTOR_BYTE
 
-; Install the handler and enable interrupts in IM 2.
-; Entry: none.  Exit: interrupts enabled.  Clobbers: A, BC, DE, HL.
+; Install the handler and switch to IM 2. Interrupts must be disabled, and
+; stay disabled: the caller enables them when ready.
+; Entry: interrupts disabled.  Exit: none.  Clobbers: A, BC, DE, HL.
 init:
-    di
     ld hl,@Alloc.interrupt_vectors
     ld bc,@Alloc.interrupt_vectors_end - @Alloc.interrupt_vectors
     ld a,VECTOR_BYTE
@@ -33,7 +33,6 @@ init:
     ld a,@Alloc.interrupt_vectors >> 8
     ld i,a
     im 2
-    ei
     ret
 
 ; Frame interrupt, 50 times a second. Runs at the top of the frame, before
