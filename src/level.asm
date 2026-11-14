@@ -15,17 +15,17 @@ init:
     call @Memory.fill
 
     ; TEMPORARY: level 13 solved in 2718 pushes, 31:41.
-.TEST_SCORE EQU @Alloc.high_scores + 13 * @Alloc.HIGH_SCORE_SIZE
+.TEST_SCORE EQU @Alloc.high_scores + 13 * 4
     ld hl,0x2718
-    ld (.TEST_SCORE + @Alloc.HIGH_SCORE_PUSHES),hl
+    ld (.TEST_SCORE),hl         ; pushes
     ld hl,0x3141
-    ld (.TEST_SCORE + @Alloc.HIGH_SCORE_TIME),hl
+    ld (.TEST_SCORE + 2),hl     ; time
     ld hl,0x0001
     ld (solved_bcd),hl
     ret
 
 ; Make a level the current one: set `number_bcd` and `number`, and copy its
-; high scores to `best`.
+; high scores to `best_pushes` and `best_time`.
 ; Entry: A = level number in BCD (0x00-0x99).
 ; Exit: none.  Clobbers: A, BC, DE, HL.
 select:
@@ -33,8 +33,8 @@ select:
     call @Math.from_bcd
     ld (number),a
     call high_score_address
-    ld de,best
-    ld bc,@Alloc.HIGH_SCORE_SIZE
+    ld de,best_pushes
+    ld bc,4                     ; pushes and time
     ldir
     ret
 
@@ -43,7 +43,6 @@ select:
 ; Exit: Z if not solved, NZ if solved.  Clobbers: A, HL.
 is_solved:
     call high_score_address
-    ASSERT @Alloc.HIGH_SCORE_PUSHES == 0
     ld a,(hl)                   ; low byte of best pushes
     ASSERT (NO_SCORE & 0xFF) == 0xFF    ; no BCD byte is 0xFF
     inc a
@@ -53,9 +52,8 @@ is_solved:
 ; Entry: A = level number in binary (0-99).
 ; Exit: HL = address.  Clobbers: A.
 high_score_address:
-    ld l,a                      ; HL = number * HIGH_SCORE_SIZE
+    ld l,a                      ; HL = number * 4
     ld h,0
-    ASSERT @Alloc.HIGH_SCORE_SIZE == 4
     add hl,hl
     add hl,hl
     ld a,h                      ; + high_scores
@@ -70,11 +68,11 @@ solved_bcd: DW 0                ; number of solved levels in BCD (0x0000-0x0100)
 number_bcd: DB 0                ; level number in BCD
 number:     DB 0                ; level number in binary
 ; Its high scores, laid out like an entry of Alloc.high_scores.
-best:
 best_pushes: DW NO_SCORE
 best_time:   DW NO_SCORE
-    ASSERT best_pushes - best == @Alloc.HIGH_SCORE_PUSHES
-    ASSERT best_time - best == @Alloc.HIGH_SCORE_TIME
-    ASSERT $ - best == @Alloc.HIGH_SCORE_SIZE
+    ASSERT best_time == best_pushes + 2
+; Its pushes and time so far, in BCD like the high scores.
+pushes: DW 0
+time:   DW 0                    ; 0xMMSS, minutes:seconds
 
     ENDMODULE

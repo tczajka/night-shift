@@ -27,12 +27,9 @@ screen_attrs_end  EQU 0x5B00
 ; a little-endian word of 4 BCD digits (time is 0xMMSS, minutes:seconds).
 ; Level.NO_SCORE in both means the level isn't solved yet; it compares as
 ; worse than any real score. Set to Level.NO_SCORE by Level.init.
-HIGH_SCORE_PUSHES EQU 0         ; offsets within a level's entry
-HIGH_SCORE_TIME   EQU 2
-HIGH_SCORE_SIZE   EQU 4
 
 high_scores     EQU 0x9000
-high_scores_end EQU high_scores + @Level.COUNT * HIGH_SCORE_SIZE
+high_scores_end EQU high_scores + @Level.COUNT * 4
 
     ASSERT high_scores_end <= stack
 
