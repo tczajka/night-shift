@@ -34,8 +34,8 @@ clear:
     xor a
     jp @Memory.fill
 
-; Draw a 3-digit binary coded decimal number from the ROM font.
-; Leaves attributes unchanged.
+; Draw a 3-digit binary coded decimal number from the ROM font; a digit
+; 0xF is drawn as '-' (see print_digit). Leaves attributes unchanged.
 ; Entry: HL = number in BCD (0x000-0x999; the top 4 bits are ignored),
 ; DE = address of the first digit's cell (see char_address).
 ; Exit: DE = address of the cell after the number (see print_char).
@@ -48,8 +48,8 @@ print_digits_3:
     pop af
     ; fall through
 
-; Draw a 2-digit binary coded decimal number from the ROM font.
-; Leaves attributes unchanged.
+; Draw a 2-digit binary coded decimal number from the ROM font; a digit
+; 0xF is drawn as '-' (see print_digit). Leaves attributes unchanged.
 ; Entry: A = number in BCD (0x00-0x99), DE = address of the first digit's
 ; cell (see char_address).
 ; Exit: DE = address of the cell after the number (see print_char).
@@ -64,14 +64,18 @@ print_digits_2:
     pop af                      ; low digit
     ; fall through
 
-; Draw a decimal digit from the ROM font. Leaves the attribute unchanged.
-; Entry: A = digit (0-9) in the low 4 bits; the high 4 bits are ignored.
-; DE = address of the cell (see char_address).
+; Draw a decimal digit from the ROM font, or '-' for 0xF, so that
+; Level.NO_SCORE shows as dashes. Leaves the attribute unchanged.
+; Entry: A = digit (0-9, or 0xF) in the low 4 bits; the high 4 bits are
+; ignored. DE = address of the cell (see char_address).
 ; Exit: DE = address of the next cell (see print_char).
 ; Clobbers: A, B, HL.
 print_digit:
     and 0x0F
     add a,'0'
+    cp '0' + 0x0F
+    jr nz,print_char
+    ld a,'-'
     ; fall through
 
 ; Draw a character from the ROM font at a bitmap address. Leaves the cell's
