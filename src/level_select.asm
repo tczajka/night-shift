@@ -2,8 +2,11 @@
 
     MODULE LevelSelect
 
-ATTR        EQU @Screen.WHITE | @Screen.BLACK << 3 | @Screen.BRIGHT
-SOLVED_ATTR EQU @Screen.GREEN | @Screen.BLACK << 3 | @Screen.BRIGHT
+ATTR          EQU @Screen.WHITE | @Screen.BLACK << 3 | @Screen.BRIGHT
+SOLVED_ATTR   EQU @Screen.GREEN | @Screen.BLACK << 3 | @Screen.BRIGHT
+SELECTED_ATTR EQU @Screen.MAGENTA | @Screen.BLACK << 3 | @Screen.BRIGHT
+
+NONE        EQU 0xFF            ; no level (not valid BCD)
 
 start:
     ld a,ATTR
@@ -30,16 +33,90 @@ start:
     ld hl,(@Level.solved_bcd)   ; number of solved levels
     call @Screen.print_digits_3
 
+    ld a,NONE                   ; no level shown as selected yet
+    ld (shown_bcd),a
     call @Input.reset           ; ignore inputs from before the finished screen
-.loop:
+
+event_loop:
     halt
-    jr .loop
+    call draw
+    call update
+    jr event_loop
+
+; Show the current level (Level.number_bcd) as selected, if it isn't
+; already: give the previously selected one back its normal colour, then
+; give the current one SELECTED_ATTR.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+draw:
+    ld a,(@Level.number_bcd)
+    ld hl,shown_bcd
+    cp (hl)
+    ret z
+    ld a,(hl)
+    cp NONE
+    jr z,.select
+    call normal_attr
+    ld h,a
+    ld a,(shown_bcd)
+    call paint_level
+.select:
+    ld a,(@Level.number_bcd)
+    ld (shown_bcd),a
+    ld h,SELECTED_ATTR
+    jp paint_level
+
+; Move the current level with the direction inputs: in BCD, +1 / -1 for
+; right / left and +0x10 / -0x10 for down / up. Moving off an edge of the
+; grid wraps around to the opposite edge.
+; Entry: none.  Exit: none.  Clobbers: A, BC, D, HL.
+update:
+    call @Input.get_pressed
+    ld b,a                      ; B = pressed inputs
+    ld a,(@Level.number_bcd)
+    ld c,a                      ; C = current level, BCD
+
+    bit @Input.RIGHT,b
+    jr z,.right_done
+    inc a
+    ld d,a
+    and 0x0F
+    cp 10
+    ld a,d
+    jr nz,.right_done
+    sub 10                      ; units 9 -> 0
+.right_done:
+    bit @Input.LEFT,b
+    jr z,.left_done
+    ld d,a
+    and 0x0F
+    ld a,d
+    jr nz,.not_leftmost
+    add a,10                    ; units 0 -> 9, after the dec
+.not_leftmost:
+    dec a
+.left_done:
+    bit @Input.DOWN,b
+    jr z,.down_done
+    add a,0x10
+    cp 0xA0
+    jr c,.down_done
+    sub 0xA0                    ; tens 9 -> 0
+.down_done:
+    bit @Input.UP,b
+    jr z,.up_done
+    sub 0x10
+    jr nc,.up_done
+    add a,0xA0                  ; tens 0 -> 9
+.up_done:
+
+    cp c
+    ret z                       ; unchanged
+    jp @Level.select
 
 ; Print the level numbers 00-99 in a grid of 10 by 10 (see level_cell),
 ; solved levels in green.
-; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL, IX.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 print_levels:
-    ld ix,@Alloc.high_scores
     xor a                       ; level number in BCD
 .level:
     push af
@@ -47,27 +124,42 @@ print_levels:
     call @Screen.char_address
     pop af
     push af
-    push bc
     call @Screen.print_digits_2
-    pop bc
-
-    ld a,(ix + @Alloc.HIGH_SCORE_PUSHES)
-    ASSERT (@Level.NO_SCORE & 0xFF) == 0xFF ; no BCD byte is 0xFF
-    inc a
-    jr z,.next                  ; not solved
-    call @Screen.attr_address
-    ld a,SOLVED_ATTR
-    ld (de),a                   ; both digits' cells
-    inc e
-    ld (de),a
-.next:
-    ld de,@Alloc.HIGH_SCORE_SIZE
-    add ix,de
+    pop af
+    push af
+    call normal_attr
+    ld h,a
+    pop af
+    push af
+    call paint_level
     pop af
     add a,1                     ; next level, in BCD
     daa
     ASSERT @Level.COUNT == 100
     jr nc,.level                ; until 99 wraps to 00
+    ret
+
+; The attribute of a level's number when it isn't selected: SOLVED_ATTR if
+; the level is solved, ATTR if not.
+; Entry: A = level number in BCD.  Exit: A = attribute.  Clobbers: BC, HL.
+normal_attr:
+    call @Math.from_bcd
+    call @Level.is_solved
+    ld a,ATTR
+    ret z
+    ld a,SOLVED_ATTR
+    ret
+
+; Set the attribute of both cells of a level's number.
+; Entry: A = level number in BCD, H = attribute.
+; Exit: none.  Clobbers: A, BC, DE.
+paint_level:
+    call level_cell
+    call @Screen.attr_address
+    ld a,h
+    ld (de),a
+    inc e
+    ld (de),a
     ret
 
 ; Character cell of a level's number in the grid: level tens:units is at
@@ -97,5 +189,7 @@ SELECT_LEVEL_TEXT_LEN EQU $ - select_level_text
 solved_text:
     DB "Solved:"
 SOLVED_TEXT_LEN EQU $ - solved_text
+
+shown_bcd:  DB NONE             ; level shown as selected, in BCD, or NONE
 
     ENDMODULE

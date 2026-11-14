@@ -32,16 +32,36 @@ select:
     ld (number_bcd),a
     call @Math.from_bcd
     ld (number),a
-    ld l,a                      ; HL = high_scores + number * HIGH_SCORE_SIZE
+    call high_score_address
+    ld de,best
+    ld bc,@Alloc.HIGH_SCORE_SIZE
+    ldir
+    ret
+
+; Whether a level is solved, i.e. its high scores aren't NO_SCORE.
+; Entry: A = level number in binary (0-99).
+; Exit: Z if not solved, NZ if solved.  Clobbers: A, HL.
+is_solved:
+    call high_score_address
+    ASSERT @Alloc.HIGH_SCORE_PUSHES == 0
+    ld a,(hl)                   ; low byte of best pushes
+    ASSERT (NO_SCORE & 0xFF) == 0xFF    ; no BCD byte is 0xFF
+    inc a
+    ret
+
+; Address of a level's entry in Alloc.high_scores.
+; Entry: A = level number in binary (0-99).
+; Exit: HL = address.  Clobbers: A.
+high_score_address:
+    ld l,a                      ; HL = number * HIGH_SCORE_SIZE
     ld h,0
     ASSERT @Alloc.HIGH_SCORE_SIZE == 4
     add hl,hl
     add hl,hl
-    ld de,@Alloc.high_scores
-    add hl,de
-    ld de,best
-    ld bc,@Alloc.HIGH_SCORE_SIZE
-    ldir
+    ld a,h                      ; + high_scores
+    ASSERT (@Alloc.high_scores & 0xFF) == 0
+    add a,@Alloc.high_scores >> 8
+    ld h,a
     ret
 
 solved_bcd: DW 0                ; number of solved levels in BCD (0x0000-0x0100)
