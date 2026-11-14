@@ -15,6 +15,7 @@ start:
     di                          ; until initialized; the splash enables them
     ld sp,Alloc.stack_end       ; leave the BASIC stack; no return to BASIC
     call Interrupt.init
+    call Level.init
     jp Splash.start
 
     INCLUDE "memory.asm"
@@ -22,6 +23,7 @@ start:
     INCLUDE "input.asm"
     INCLUDE "screen.asm"
     INCLUDE "header.asm"
+    INCLUDE "level.asm"
     INCLUDE "splash.asm"
     INCLUDE "level_select.asm"
 code_end:

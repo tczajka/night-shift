@@ -5,7 +5,8 @@
 ;   5800-5AFF  screen attributes
 ;   5B00-7FFF  BASIC
 ;   8000-....  code (code_start..code_end), loaded from tape
-;   E000-FCFF  stack (7.25KB)
+;   E000-FBFF  stack (7KB)
+;   FC00-FD8F  high scores
 ;   FDFD-FDFF  interrupt entry
 ;   FE00-FF00  interrupt table
 ;   FF58-FFFF  BASIC
@@ -25,7 +26,22 @@ screen_attrs_end  EQU 0x5B00
 ; Stack: SP starts at stack_end (set by `start`) and grows down towards
 ; stack. Uncontended memory, so pushes and calls run at full speed.
 stack           EQU 0xE000
-stack_end       EQU 0xFD00
+stack_end       EQU 0xFC00
+
+    ASSERT stack_end <= high_scores
+
+; High scores: for each level, best pushes then best time, each
+; a little-endian word of 4 BCD digits (time is 0xMMSS, minutes:seconds).
+; Level.NO_SCORE in both means the level isn't solved yet; it compares as
+; worse than any real score. Set to Level.NO_SCORE by Level.init.
+HIGH_SCORE_PUSHES EQU 0         ; offsets within a level's entry
+HIGH_SCORE_TIME   EQU 2
+HIGH_SCORE_SIZE   EQU 4
+
+high_scores     EQU 0xFC00
+high_scores_end EQU high_scores + @Level.COUNT * HIGH_SCORE_SIZE
+
+    ASSERT high_scores_end <= interrupt_entry
 
 ; JP to the interrupt handler (3 bytes). Its address must be the same byte
 ; twice, because every IM 2 vector in the table reads as that address.
