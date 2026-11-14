@@ -12,7 +12,17 @@ init:
     ld bc,@Alloc.high_scores_end - @Alloc.high_scores
     ASSERT NO_SCORE == 0xFFFF   ; both bytes the same
     ld a,NO_SCORE & 0xFF
-    jp @Memory.fill
+    call @Memory.fill
+
+    ; TEMPORARY: level 13 solved in 2718 pushes, 31:41.
+.TEST_SCORE EQU @Alloc.high_scores + 13 * @Alloc.HIGH_SCORE_SIZE
+    ld hl,0x2718
+    ld (.TEST_SCORE + @Alloc.HIGH_SCORE_PUSHES),hl
+    ld hl,0x3141
+    ld (.TEST_SCORE + @Alloc.HIGH_SCORE_TIME),hl
+    ld hl,0x0001
+    ld (solved_bcd),hl
+    ret
 
 ; Make a level the current one: set `number_bcd` and `number`, and copy its
 ; high scores to `best`.
