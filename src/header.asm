@@ -1,4 +1,4 @@
-; Header, row 0 of the level select and level screens:
+; Header, row 0 of the level select and play screens:
 ; "Level 00  Pushes 0000 Time 00:00".
 
     MODULE Header

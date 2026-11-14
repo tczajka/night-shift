@@ -28,6 +28,7 @@ start:
     INCLUDE "level.asm"
     INCLUDE "splash.asm"
     INCLUDE "level_select.asm"
+    INCLUDE "play.asm"
 code_end:
     INCLUDE "alloc.asm"
     INCLUDE "tape.asm"

@@ -40,6 +40,9 @@ start:
 event_loop:
     halt
     call draw
+    call @Input.get_pressed
+    bit @Input.FIRE,a
+    jp nz,@Play.start           ; play the current level
     call update
     jr event_loop
 
@@ -80,9 +83,9 @@ draw:
 ; Move the current level with the direction inputs: in BCD, +1 / -1 for
 ; right / left and +0x10 / -0x10 for down / up. Moving off an edge of the
 ; grid wraps around to the opposite edge.
-; Entry: none.  Exit: none.  Clobbers: A, BC, D, HL.
+; Entry: A = pressed inputs (see Input.get_pressed).
+; Exit: none.  Clobbers: A, BC, D, HL.
 update:
-    call @Input.get_pressed
     ld b,a                      ; B = pressed inputs
     ld a,(@Level.number_bcd)
     ld c,a                      ; C = current level, BCD
