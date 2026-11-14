@@ -97,8 +97,8 @@ slides smoothly to the next tile, so sprites are often not aligned to the
 
 ## Controls
 
-- Q ↑ A ↓ O ← P →, Space for fire, plus a Kempston joystick if detected at
-  startup (`src/input.asm`). No other keys or joysticks.
+- Q ↑ A ↓ O ← P →, Space for fire, plus a Kempston joystick if connected
+  (`src/input.asm`). No other keys or joysticks.
 - Game code reads `Input.held` and takes new presses with
   `Input.get_pressed` (both fed by the frame interrupt); it never reads
   the ports itself.

@@ -24,8 +24,8 @@ Keyboard, or a Kempston joystick:
 | Q / A / O / P | Up / down / left / right |
 | Space | Fire: choose a level, pause, confirm |
 
-A Kempston interface is detected automatically when the game starts; the
-keyboard keeps working alongside it. Cursor and Sinclair joysticks,
+A Kempston interface is used whenever one is connected; the keyboard
+keeps working alongside it. Cursor and Sinclair joysticks,
 including the built-in joystick ports of the +2, +2A and +3, are not
 supported.
 
