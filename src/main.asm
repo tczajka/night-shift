@@ -19,6 +19,7 @@ start:
     jp Splash.start
 
     INCLUDE "memory.asm"
+    INCLUDE "math.asm"
     INCLUDE "interrupt.asm"
     INCLUDE "input.asm"
     INCLUDE "screen.asm"
