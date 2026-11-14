@@ -148,4 +148,24 @@ char_address:
     ld e,a
     ret
 
+; Attribute address of a character cell. Attributes are linear: the address
+; is screen_attrs + row * 32 + column.
+; Entry: B = row (0-23), C = column (0-31).
+; Exit: DE = address.  Clobbers: A.
+attr_address:
+    ld a,b                      ; A = (row & 7) << 5 | row >> 3
+    rrca
+    rrca
+    rrca
+    ld d,a
+    and 0xE0                    ; E = (row & 7) << 5 | column
+    or c
+    ld e,a
+    ld a,d                      ; D = high byte of screen_attrs + row >> 3
+    and 3
+    ASSERT (@Alloc.screen_attrs & 0x3FF) == 0   ; so OR adds row >> 3
+    or @Alloc.screen_attrs >> 8
+    ld d,a
+    ret
+
     ENDMODULE
