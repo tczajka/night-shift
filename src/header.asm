@@ -3,7 +3,9 @@
 
     MODULE Header
 
-; Columns of the numbers in row 0.
+; Columns of the labels and numbers in row 0.
+PUSHES_LABEL_COLUMN EQU 10
+TIME_LABEL_COLUMN   EQU 22
 LEVEL_COLUMN  EQU 6
 PUSHES_COLUMN EQU 17
 TIME_COLUMN   EQU 27            ; minutes; seconds at TIME_COLUMN + 3
@@ -16,21 +18,15 @@ print_labels:
     ld hl,level_text
     ld b,LEVEL_TEXT_LEN
     call @Screen.print_string
-    ld a,e
-    add a,5                     ; to column 10
-    ld e,a
+    ld e,PUSHES_LABEL_COLUMN    ; row 0: E is the column
     ld hl,pushes_text
     ld b,PUSHES_TEXT_LEN
     call @Screen.print_string
-    ld a,e
-    add a,6                     ; to column 22
-    ld e,a
+    ld e,TIME_LABEL_COLUMN
     ld hl,time_text
     ld b,TIME_TEXT_LEN
     call @Screen.print_string
-    ld a,e
-    add a,3                     ; to column 29
-    ld e,a
+    ld e,TIME_COLUMN + 2        ; between minutes and seconds
     ld a,':'
     jp @Screen.print_char
 

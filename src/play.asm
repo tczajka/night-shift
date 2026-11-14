@@ -19,17 +19,21 @@ start:
     ld a,(@Level.number_bcd)
     call @Screen.print_digits_2
 
-    ; Row 1: "Best", then the level's best pushes and time, under the
-    ; header's.
+    ; Row 1: the level's best pushes and time, each under the header's
+    ; and labelled "Best" under "Pushes" and "Time".
     ASSERT BEST_ROW < 8
 BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
-    ld de,BEST_LINE
+    ld de,BEST_LINE + @Header.PUSHES_LABEL_COLUMN
     ld hl,best_text
     ld b,BEST_TEXT_LEN
     call @Screen.print_string
     ld de,BEST_LINE + @Header.PUSHES_COLUMN
     ld hl,(@Level.best_pushes)
     call @Screen.print_digits_4
+    ld de,BEST_LINE + @Header.TIME_LABEL_COLUMN
+    ld hl,best_text
+    ld b,BEST_TEXT_LEN
+    call @Screen.print_string
     ld de,BEST_LINE + @Header.TIME_COLUMN
     ld hl,(@Level.best_time)
     call @Screen.print_time
