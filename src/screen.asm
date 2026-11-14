@@ -34,6 +34,36 @@ clear:
     xor a
     jp @Memory.fill
 
+; Draw a time in BCD as minutes and seconds, skipping the cell between them
+; (where the ':' is already drawn). A digit 0xF is drawn as '-' (see
+; print_digit). Leaves attributes unchanged.
+; Entry: HL = time in BCD, 0xMMSS (minutes in H, seconds in L), DE = address
+; of the first digit's cell (see char_address).
+; Exit: DE = address of the cell after the seconds (see print_char).
+; Clobbers: A, B, HL.
+print_time:
+    ld a,l                      ; seconds, for later
+    push af
+    ld a,h                      ; minutes
+    call print_digits_2
+    inc e                       ; skip the ':'
+    pop af
+    jr print_digits_2
+
+; Draw a 4-digit binary coded decimal number from the ROM font; a digit
+; 0xF is drawn as '-' (see print_digit). Leaves attributes unchanged.
+; Entry: HL = number in BCD (0x0000-0x9999), DE = address of the first
+; digit's cell (see char_address).
+; Exit: DE = address of the cell after the number (see print_char).
+; Clobbers: A, B, HL.
+print_digits_4:
+    ld a,l                      ; low 2 digits, for later
+    push af
+    ld a,h                      ; high 2 digits
+    call print_digits_2
+    pop af
+    jr print_digits_2
+
 ; Draw a 3-digit binary coded decimal number from the ROM font; a digit
 ; 0xF is drawn as '-' (see print_digit). Leaves attributes unchanged.
 ; Entry: HL = number in BCD (0x000-0x999; the top 4 bits are ignored),

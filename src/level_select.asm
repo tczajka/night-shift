@@ -44,8 +44,9 @@ event_loop:
     jr event_loop
 
 ; Show the current level (Level.number_bcd) as selected, if it isn't
-; already: give the previously selected one back its normal colour, then
-; give the current one SELECTED_ATTR.
+; already: give the previously selected one back its normal colour, give
+; the current one SELECTED_ATTR, and print its number and best scores in
+; the header.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw:
     ld a,(@Level.number_bcd)
@@ -63,7 +64,18 @@ draw:
     ld a,(@Level.number_bcd)
     ld (shown_bcd),a
     ld h,SELECTED_ATTR
-    jp paint_level
+    call paint_level
+
+    ; Header: the level's number and its best pushes and time.
+    ld de,@Alloc.screen_bitmap + @Header.LEVEL_COLUMN   ; row 0
+    ld a,(@Level.number_bcd)
+    call @Screen.print_digits_2
+    ld de,@Alloc.screen_bitmap + @Header.PUSHES_COLUMN
+    ld hl,(@Level.best_pushes)
+    call @Screen.print_digits_4
+    ld de,@Alloc.screen_bitmap + @Header.TIME_COLUMN
+    ld hl,(@Level.best_time)
+    jp @Screen.print_time
 
 ; Move the current level with the direction inputs: in BCD, +1 / -1 for
 ; right / left and +0x10 / -0x10 for down / up. Moving off an edge of the

@@ -3,6 +3,11 @@
 
     MODULE Header
 
+; Columns of the numbers in row 0.
+LEVEL_COLUMN  EQU 6
+PUSHES_COLUMN EQU 17
+TIME_COLUMN   EQU 27            ; minutes; seconds at TIME_COLUMN + 3
+
 ; Print the header labels. The numbers go in the gaps; within a row, moving
 ; right just adds to E.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
