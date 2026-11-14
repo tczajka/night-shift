@@ -12,10 +12,11 @@
 code_start:
 
 start:
-    di                          ; until initialized; the splash enables them
+    di                          ; no ROM interrupt handler while initializing
     ld sp,Alloc.stack_end       ; leave the BASIC stack; no return to BASIC
     call Interrupt.init
     call Level.init
+    ei                          ; initialized: start our frame interrupt
     jp Splash.start
 
     INCLUDE "memory.asm"

@@ -3,7 +3,6 @@
     MODULE LevelSelect
 
 start:
-    di                          ; draw without frame interrupts
     ld a,@Screen.WHITE | @Screen.BLACK << 3 | @Screen.BRIGHT
     call @Screen.clear
 
@@ -27,7 +26,6 @@ start:
     call @Screen.print_digits_3
 
     call @Input.reset           ; ignore inputs from before the finished screen
-    ei
 .loop:
     halt
     jr .loop

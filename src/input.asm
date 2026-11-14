@@ -92,7 +92,8 @@ scan:
 
 ; Forget all inputs: treat every input as held, so one down now counts as
 ; pressed only after it is released and pressed again, and clear `pressed`.
-; Call with interrupts disabled, before enabling them for a new screen.
+; Safe with interrupts enabled: a scan between the two stores counts nothing,
+; because `held` is already all set, and leaves `held` up to date.
 ; Entry: none.  Exit: none.  Clobbers: A.
 reset:
     ld a,ALL
