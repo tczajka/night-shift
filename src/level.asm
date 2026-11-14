@@ -34,6 +34,8 @@ select:
     ldir
     ret
 
+solved_bcd: DW 0                ; number of solved levels in BCD (0x0000-0x0100)
+
 ; The current level.
 number_bcd: DB 0                ; level number in BCD
 number:     DB 0                ; level number in binary

@@ -34,6 +34,20 @@ clear:
     xor a
     jp @Memory.fill
 
+; Draw a 3-digit binary coded decimal number from the ROM font.
+; Leaves attributes unchanged.
+; Entry: HL = number in BCD (0x000-0x999; the top 4 bits are ignored),
+; DE = address of the first digit's cell (see char_address).
+; Exit: DE = address of the cell after the number (see print_char).
+; Clobbers: A, B, HL.
+print_digits_3:
+    ld a,l                      ; low 2 digits, for later
+    push af
+    ld a,h                      ; high digit
+    call print_digit
+    pop af
+    ; fall through
+
 ; Draw a 2-digit binary coded decimal number from the ROM font.
 ; Leaves attributes unchanged.
 ; Entry: A = number in BCD (0x00-0x99), DE = address of the first digit's
