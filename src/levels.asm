@@ -76,8 +76,8 @@ high_score_address:
 
 solved_bcd: DW 0                ; number of solved levels in BCD (0x0000-0x0100)
 
-@code_cur DEFL $
-    ORG @uninit_cur
+@code_save DEFL $
+    ORG @uninit_save
 
 ; High scores: for each level, best pushes then best time, each a
 ; little-endian word of 4 BCD digits (time is 0xMMSS, minutes:seconds).
@@ -89,7 +89,7 @@ high_scores:
     DS COUNT * 4
 high_scores_end:
 
-@uninit_cur DEFL $
-    ORG @code_cur
+@uninit_save DEFL $
+    ORG @code_save
 
     ENDMODULE

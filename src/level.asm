@@ -185,8 +185,8 @@ best_time:   DW @Levels.NO_SCORE
     ASSERT best_time == best_pushes + 2
 time_running: DB 0              ; nonzero: time_tick advances the time
 
-@code_cur DEFL $
-    ORG @uninit_cur
+@code_save DEFL $
+    ORG @uninit_save
 
 ; The current level, set up by load.
 ; Board: 16x11 squares, row by row, one byte each, made of WALL, FLOOR,
@@ -203,7 +203,7 @@ pushes:      DS 2               ; pushes so far, BCD
 time:        DS 2               ; time so far, BCD 0xMMSS (minutes:seconds)
 time_frames: DS 1               ; frames (1/50 s) since `time` last changed, 0-49
 
-@uninit_cur DEFL $
-    ORG @code_cur
+@uninit_save DEFL $
+    ORG @code_save
 
     ENDMODULE

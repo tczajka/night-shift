@@ -4,16 +4,17 @@
     DEVICE ZXSPECTRUM48
 
 ; Two sections: initialized bytes (code..code_end: all game code and data,
-; saved to tape as one CODE block) and uninitialized ones (from uninit: RAM
-; set up at run time, see Alloc). code and uninit are where they begin;
-; code_cur and uninit_cur are where the next bytes go. Switch between them
-; with ORG, saving the current position (DEFL) first.
+; saved to tape as one CODE block) and uninitialized ones (uninit..
+; uninit_end: RAM set up at run time, see Alloc). code and uninit are where
+; they begin. code_save and uninit_save hold the position reached in each
+; while assembling the other: to switch, save the current position (DEFL)
+; and ORG to the other's.
 code        EQU 0x8000          ; above contended memory
 uninit      EQU 0xA000
-code_cur    DEFL code
-uninit_cur  DEFL uninit
+code_save   DEFL code
+uninit_save DEFL uninit
 
-    ORG code_cur
+    ORG code
 
     INCLUDE "profile.asm"       ; macros only, no code
 
@@ -32,6 +33,8 @@ uninit_cur  DEFL uninit
     INCLUDE "level_select.asm"
     INCLUDE "play.asm"
 code_end:
+    ORG uninit_save
+uninit_end:
     ASSERT code_end <= uninit
     INCLUDE "alloc.asm"
     INCLUDE "tape.asm"

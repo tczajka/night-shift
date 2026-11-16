@@ -19,10 +19,10 @@
     MODULE Alloc
 
     ; code..code_end (see main.asm)
-    ; uninit..uninit_cur (see main.asm)
+    ; uninit..uninit_end (see main.asm)
 
     ORG 0xE000
-    ASSERT @uninit_cur <= $
+    ASSERT @uninit_end <= $
 
 ; Stack: SP starts at stack_end (set by `Start.start`) and grows down
 ; towards stack. Uncontended memory, so pushes and calls run at full speed.
