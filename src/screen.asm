@@ -149,6 +149,56 @@ print_string:
     djnz .char
     ret
 
+; Draw a 16x16 sprite (see Sprite) on a 2x2 block of character cells.
+; Leaves attributes unchanged.
+; Entry: HL = sprite, B = row (0-22), C = column (0-30) of the top left cell.
+; Exit: none.  Clobbers: A, BC, DE, HL.
+draw_tile:
+    push bc
+    call char_address           ; top half
+    call .half
+    pop bc
+    inc b                       ; bottom half
+    call char_address
+    ; fall through
+.half:
+    ld b,8
+.line:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc e
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    dec e
+    inc d                       ; next pixel line of the cells
+    djnz .line
+    ret
+
+; Set the attributes of a 2x2 block of character cells.
+; Entry: A = attribute, B = row (0-22), C = column (0-30) of the top left
+; cell.
+; Exit: none.  Clobbers: A, DE, H.
+paint_tile:
+    ld h,a
+    call attr_address
+    ld a,h
+    ld (de),a
+    inc e
+    ld (de),a
+    ld a,e                      ; down a row, back a column
+    add a,31
+    ld e,a
+    jr nc,.same_page
+    inc d
+.same_page:
+    ld a,h
+    ld (de),a
+    inc e
+    ld (de),a
+    ret
+
 ; Bitmap address of the top pixel line of a character cell. The cell's other
 ; 7 lines follow at D + 1 ... D + 7, with E unchanged.
 ; Entry: B = row (0-23), C = column (0-31).

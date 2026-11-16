@@ -3,6 +3,8 @@
     MODULE Play
 
 BEST_ROW    EQU 1               ; "Best" line, below the header
+BOARD_ROW   EQU 2               ; character row of the board's top
+    ASSERT BOARD_ROW + 2 * @Level.HEIGHT <= 24
 
 NONE        EQU 0xFFFF          ; no number shown yet (not valid BCD)
 
@@ -16,6 +18,7 @@ start:
     ld hl,NONE                  ; pushes and time not shown yet: draw shows them
     ld (shown_pushes),hl
     ld (shown_time),hl
+    call draw_board
 
     call @Input.reset           ; ignore inputs from before the finished screen
 
@@ -63,6 +66,51 @@ BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
     ld de,BEST_LINE + @Header.TIME_COLUMN + 2
     ld a,':'
     jp @Screen.print_char
+
+; Draw the board (Alloc.board): for now, the walls, each square of wall as
+; Sprite.wall in Color.WALL_ATTR. Other squares are left as they are.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+draw_board:
+    ld hl,@Alloc.board          ; L = position
+.square:
+    ld a,(hl)
+    and @Level.WALL
+    jr z,.next
+    push hl
+    ld a,l
+    call square_cell
+    push bc
+    ld hl,@Sprite.wall
+    call @Screen.draw_tile
+    pop bc
+    ld a,@Color.WALL_ATTR
+    call @Screen.paint_tile
+    pop hl
+.next:
+    inc l
+    ld a,l
+    cp @Level.WIDTH * @Level.HEIGHT
+    jr nz,.square
+    ret
+
+; Character cell of a board square's top left corner: each square is 2x2
+; cells, the board starting at row BOARD_ROW, column 0.
+; Entry: A = position (row * 16 + column).
+; Exit: B = row, C = column.  Clobbers: A.
+square_cell:
+    ASSERT @Level.WIDTH == 16
+    ld c,a                      ; B = BOARD_ROW + 2 * row
+    and 0xF0                    ; row * 16
+    rrca
+    rrca
+    rrca                        ; row * 2
+    add a,BOARD_ROW
+    ld b,a
+    ld a,c                      ; C = 2 * column
+    and 0x0F
+    add a,a
+    ld c,a
+    ret
 
 ; Show the level's pushes and time (Alloc.pushes, Alloc.time) in the
 ; header, each only if it has changed since it was last shown.

@@ -33,6 +33,7 @@ start:
     INCLUDE "interrupt.asm"
     INCLUDE "input.asm"
     INCLUDE "screen.asm"
+    INCLUDE "sprite.asm"
     INCLUDE "header.asm"
     INCLUDE "level.asm"
     INCLUDE "splash.asm"
