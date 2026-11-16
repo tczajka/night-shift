@@ -4,7 +4,7 @@
 
 start:
     di                          ; no ROM interrupt handler while initializing
-    ld sp,@Alloc.stack_end      ; leave the BASIC stack; no return to BASIC
+    ld sp,@Memory.stack_end     ; leave the BASIC stack; no return to BASIC
     call @Interrupt.init
     call @Levels.init
     ei                          ; initialized: start our frame interrupt

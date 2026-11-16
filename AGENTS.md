@@ -33,14 +33,14 @@ in Z80 assembly. See `README.md` for the player-facing description.
   `main.asm`: only that range is saved to tape.
 - Includes: `profile.asm` (macros) first, then `levels.asm` (its data is
   page-aligned, so at `code` the ALIGN adds nothing), then the rest of the
-  code, including `color.asm` (constants only), then `alloc.asm` and
-  `tape.asm` last.
-- Refer to labels in other modules with `@` (e.g. `@Alloc.stack_end`).
+  code, including `color.asm` (constants only), then `tape.asm` last.
+- Refer to labels in other modules with `@` (e.g. `@Memory.stack_end`).
   It is required inside a `MODULE`: there a plain reference to a label
   defined later is first taken as module-local, which leaves bogus
   `<Module>.<Other>.*` symbols in the symbol file.
-- `Alloc` places every fixed RAM area with `ORG` and `DS`. Before each
-  `ORG`, add `ASSERT $ <= <label of the next area>`.
+- Each module reserves its own RAM with `ORG` and `DS`: variables set up
+  at run time in the uninitialized section (switching with `code_save`
+  and `uninit_save`, see `main.asm`), fixed areas at their addresses.
 - Add binary files to the Makefile dependencies when introducing `INCBIN`.
 - Comment non-obvious routines with register usage on entry and exit, plus
   the registers they clobber.
