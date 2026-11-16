@@ -53,8 +53,9 @@ in Z80 assembly. See `README.md` for the player-facing description.
 
 ## Screen design
 
-`design/` holds character-cell mock-ups of each screen; keep them in sync
-with the code. Decisions not visible in them:
+`design/` holds character-cell mock-ups of each screen and the level
+format (`level-format.md`); keep them in sync with the code. Decisions not
+visible in them:
 
 - The loading screen (`images/load.scr`, edited directly, not generated)
   doubles as the splash screen (`src/splash.asm`).
@@ -108,6 +109,5 @@ slides smoothly to the next tile, so sprites are often not aligned to the
 
 Record each choice here, and in `README.md` where it affects players:
 
-- Level data format
 - Animation speed: 2 pixels per frame (8 frames per tile) or 1 (16 frames)
 - Whether to support 128K features (AY sound, extra memory)
