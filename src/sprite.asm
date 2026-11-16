@@ -1,7 +1,11 @@
 ; Sprites: 16x16 pixels, 16 rows of 2 bytes, top row first, leftmost pixel
-; in bit 7 of the first byte. A set bit is ink, a clear bit paper.
+; in bit 7 of the first byte. A set bit is ink, a clear bit paper. Each is
+; 32 bytes, and they start on a multiple of 32, so every sprite does.
 
     MODULE Sprite
+
+    ALIGN 32
+begin:
 
 ; Wall: brickwork, in Color.WALL_ATTR: white mortar (ink) between dark red
 ; bricks (paper). Each course is a mortar line and 3 lines of bricks 8
@@ -142,5 +146,7 @@ bulldozer_up:
     ASSERT bulldozer_left - bulldozer == @Math.LEFT * 32
     ASSERT bulldozer_down - bulldozer == @Math.DOWN * 32
     ASSERT bulldozer_up - bulldozer == @Math.UP * 32
+
+end:
 
     ENDMODULE
