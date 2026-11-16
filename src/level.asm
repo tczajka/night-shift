@@ -16,12 +16,6 @@ TARGET      EQU 0x04
 CRATE       EQU 0x08
 
 NO_SQUARE   EQU 0xFF            ; not a position
-
-; Directions (Alloc.facing).
-UP          EQU 0
-RIGHT       EQU 1
-DOWN        EQU 2
-LEFT        EQU 3
     ASSERT WIDTH * HEIGHT <= NO_SQUARE
 
 ; Mark every level as not solved yet: set all high scores to NO_SCORE.
@@ -83,7 +77,8 @@ high_score_address:
 
 ; Load the current level (`number`) from the level data (`levels` in
 ; main.asm): set up the board (see mark_floor) and the bulldozer, facing
-; up, and set the pushes and time to 0. Call it with the time stopped (`time_running` clear).
+; right, and set the pushes and time to 0. Call it with the time stopped
+; (`time_running` clear).
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 load:
     ld a,(number)               ; HL = the level's index entry
@@ -145,7 +140,7 @@ load:
     call mark_floor
 
     xor a
-    ASSERT UP == 0
+    ASSERT @Math.RIGHT == 0
     ld (@Alloc.facing),a
     ld (@Alloc.time_frames),a
     ld h,a
@@ -157,9 +152,10 @@ load:
 ; Mark the floor: set FLOOR on every square the bulldozer could reach if
 ; nothing were in the way, i.e. the squares inside the walls. A flood fill
 ; from the bulldozer, with the squares still to visit kept on the stack
-; (at most 4 per square: 4 * 176 words).
+; (at most 4 per square, plus the NO_SQUARE marker: 1 + 4 * 11 * 16 words
+; = 0x582 bytes).
 ; Entry: the walls and the bulldozer set up.  Exit: none.
-; Clobbers: A, DE, HL.
+; Clobbers: A, BC, DE, HL.
 mark_floor:
     ld h,@Alloc.board >> 8
     ld e,NO_SQUARE              ; marks the bottom of the squares to visit
@@ -174,36 +170,18 @@ mark_floor:
     or FLOOR
     ld (hl),a
 
-    ; Visit the neighbours that are on the board.
-    ASSERT WIDTH == 16
-    ld a,l                      ; left
-    and 0x0F
-    jr z,.left_done
-    ld e,l
-    dec e
-    push de
-.left_done:
-    ld a,l                      ; right
-    and 0x0F
-    cp WIDTH - 1
-    jr z,.right_done
-    ld e,l
-    inc e
-    push de
-.right_done:
-    ld a,l                      ; up
-    sub WIDTH
-    jr c,.up_done
+    ; Visit the 4 neighbours. The walls enclose the floor, so they are all
+    ; on the board.
+    ld bc,offsets
+.neighbour:
+    ld a,(bc)
+    add a,l
     ld e,a
     push de
-.up_done:
-    ld a,l                      ; down
-    add a,WIDTH
-    cp WIDTH * HEIGHT
-    jr nc,.down_done
-    ld e,a
-    push de
-.down_done:
+    inc bc
+    ld a,c
+    cp offsets_end & 0xFF
+    jr nz,.neighbour
 
 .next:
     pop de
@@ -245,6 +223,15 @@ time_tick:
     ld l,a
     ld (@Alloc.time),hl
     ret
+
+; Position offset of a step in each direction, indexed by the Math
+; directions.
+offsets:
+    DB 1, -1, WIDTH, -WIDTH
+offsets_end:
+    ASSERT offsets_end - offsets == 4
+    ASSERT @Math.RIGHT == 0 && @Math.LEFT == 1
+    ASSERT @Math.DOWN == 2 && @Math.UP == 3
 
 solved_bcd: DW 0                ; number of solved levels in BCD (0x0000-0x0100)
 

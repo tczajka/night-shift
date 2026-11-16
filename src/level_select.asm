@@ -122,7 +122,7 @@ update:
     ld a,(@Level.number_bcd)
     ld c,a                      ; C = current level, BCD
 
-    bit @Input.RIGHT,b
+    bit @Math.RIGHT,b
     jr z,.right_done
     inc a
     ld d,a
@@ -132,7 +132,7 @@ update:
     jr nz,.right_done
     sub 10                      ; units 9 -> 0
 .right_done:
-    bit @Input.LEFT,b
+    bit @Math.LEFT,b
     jr z,.left_done
     ld d,a
     and 0x0F
@@ -142,14 +142,14 @@ update:
 .not_leftmost:
     dec a
 .left_done:
-    bit @Input.DOWN,b
+    bit @Math.DOWN,b
     jr z,.down_done
     add a,0x10
     cp 0xA0
     jr c,.down_done
     sub 0xA0                    ; tens 9 -> 0
 .down_done:
-    bit @Input.UP,b
+    bit @Math.UP,b
     jr z,.up_done
     sub 0x10
     jr nc,.up_done

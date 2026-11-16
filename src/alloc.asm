@@ -54,7 +54,7 @@ board:
 board_end:
     ASSERT board_end - board <= 0x100
 bulldozer:   DS 1               ; position of the bulldozer
-facing:      DS 1               ; direction it faces: Level.UP, RIGHT, DOWN or LEFT
+facing:      DS 1               ; direction it faces: Math.RIGHT, LEFT, DOWN or UP
 pushes:      DS 2               ; pushes so far, BCD
 time:        DS 2               ; time so far, BCD 0xMMSS (minutes:seconds)
 time_frames: DS 1               ; frames (1/50 s) since `time` last changed, 0-49

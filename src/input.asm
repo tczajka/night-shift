@@ -8,11 +8,8 @@
 
     MODULE Input
 
-; Bit numbers, for BIT/SET/RES.
-RIGHT   EQU 0
-LEFT    EQU 1
-DOWN    EQU 2
-UP      EQU 3
+; Bit numbers, for BIT/SET/RES: the directions (Math.RIGHT, LEFT, DOWN, UP)
+; and FIRE.
 FIRE    EQU 4
 ALL     EQU 0x1F                ; mask of all five inputs
 
@@ -35,8 +32,8 @@ scan:
     ld a,0xDF                   ; half-row P O I U Y
     in a,(0xFE)
     cpl
-    ASSERT RIGHT == 0 && LEFT == 1  ; P and O are already in place
-    and (1 << RIGHT) | (1 << LEFT)
+    ASSERT @Math.RIGHT == 0 && @Math.LEFT == 1  ; P and O are in place
+    and (1 << @Math.RIGHT) | (1 << @Math.LEFT)
     ld c,a                      ; C = inputs held, 1 = pressed
 
     ; A, Q and Space are bit 0 of their half-rows: invert, rotate into
@@ -45,20 +42,20 @@ scan:
     ld a,0xFD                   ; half-row A S D F G
     in a,(0xFE)
     cpl
-    DUP DOWN                    ; bit 0 -> bit DOWN
+    DUP @Math.DOWN              ; bit 0 -> bit DOWN
     rlca
     EDUP
-    and 1 << DOWN
+    and 1 << @Math.DOWN
     or c
     ld c,a
 
     ld a,0xFB                   ; half-row Q W E R T
     in a,(0xFE)
     cpl
-    DUP UP                      ; bit 0 -> bit UP
+    DUP @Math.UP                ; bit 0 -> bit UP
     rlca
     EDUP
-    and 1 << UP
+    and 1 << @Math.UP
     or c
     ld c,a
 
