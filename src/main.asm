@@ -11,6 +11,15 @@
 ; block. All game code and data must be included inside this range.
 code_start:
 
+; The levels, built by tools/levels.py (design/level-format.md): an index of
+; 100 offsets from `levels`, then the levels. First in the code, so they
+; start on a page boundary: the index is within one page and an offset just
+; adds to the high byte (see Level.load).
+levels:
+    INCBIN "../build/levels.bin"
+levels_end:
+
+; Entry point, called by the BASIC loader (see tape.asm).
 start:
     di                          ; no ROM interrupt handler while initializing
     ld sp,Alloc.stack_end       ; leave the BASIC stack; no return to BASIC
@@ -29,15 +38,6 @@ start:
     INCLUDE "splash.asm"
     INCLUDE "level_select.asm"
     INCLUDE "play.asm"
-
-; The levels, built by tools/levels.py (design/level-format.md): an index of
-; 100 offsets from `levels`, then the levels. Last in the code, on a page
-; boundary, so the index is within one page and an offset just adds to the
-; high byte (see Level.load).
-    ALIGN 256
-levels:
-    INCBIN "../build/levels.bin"
-levels_end:
 code_end:
     INCLUDE "color.asm"
     INCLUDE "alloc.asm"

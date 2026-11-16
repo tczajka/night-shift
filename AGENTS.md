@@ -52,8 +52,10 @@ in Z80 assembly. See `README.md` for the player-facing description.
   variables don't update; IY is free.
 - The tape loader disables ROM printing to the main screen (channel S), so
   the game must draw to the screen directly.
-- The BASIC loader's addresses are text; `tape.asm` asserts they match the
-  code, so moving `ORG` means editing the loader too.
+- The BASIC loader's addresses are text. The `USR` address is generated
+  from `start`, which follows the level data at `0x8000`; the others are
+  fixed, and `tape.asm` asserts they match the code, so moving `ORG` means
+  editing the loader too.
 
 ## Screen design
 

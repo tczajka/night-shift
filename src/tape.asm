@@ -4,7 +4,7 @@
 ;
 ;   10 BORDER VAL "0": PAPER VAL "0": INK VAL "7": CLEAR VAL "32767":
 ;      POKE VAL "23739",VAL "111": LOAD "" SCREEN$ : LOAD "" CODE :
-;      RANDOMIZE USR VAL "32768"
+;      RANDOMIZE USR VAL "<start>"
 ;
 ; - BORDER/PAPER/INK, then CLEAR (which also clears the screen): the screen
 ;   is black and the picture's pixels appear in white as they load, until
@@ -16,11 +16,11 @@
 ;   appear.
 ;
 ; Numbers are written as VAL "..." so they are stored only as text (no
-; hidden 5-byte binary form). The ASSERTs keep that text in step with the
-; real addresses: change both together.
+; hidden 5-byte binary form). The USR address is generated from `start`,
+; which moves with the size of the level data in front of it. The others
+; are fixed: the ASSERT keeps them in step with the code.
 
     ASSERT code_start == 32768  ; LOAD "" CODE loads here; CLEAR just below
-    ASSERT start == 32768       ; RANDOMIZE USR target
 
     MODULE Tape
 
@@ -54,7 +54,11 @@ basic:
     DB T_POKE, T_VAL, '"23739"', ',', T_VAL, '"111"', ':'
     DB T_LOAD, '""', T_SCREEN, ':'
     DB T_LOAD, '""', T_CODE, ':'
-    DB T_RANDOMIZE, T_USR, T_VAL, '"32768"'
+    DB T_RANDOMIZE, T_USR, T_VAL, '"'
+    ASSERT @start >= 10000 && @start <= 65535   ; 5 digits
+    DB '0' + @start / 10000 % 10, '0' + @start / 1000 % 10
+    DB '0' + @start / 100 % 10, '0' + @start / 10 % 10, '0' + @start % 10
+    DB '"'
     DB T_ENTER
 .line_end:
 basic_end:
