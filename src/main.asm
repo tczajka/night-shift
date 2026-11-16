@@ -48,6 +48,7 @@ uninit_save DEFL uninit
     INCLUDE "splash.asm"
     INCLUDE "level_select.asm"
     INCLUDE "play.asm"
+    INCLUDE "pause.asm"
 code_end:
     ORG uninit_save
 uninit_end:

@@ -29,7 +29,11 @@ event_loop:
     halt
     PROFILE_BORDER @Color.BLUE     ; drawing
     call draw
-    PROFILE_BORDER @Color.RED      ; processing after the draw (none yet)
+    PROFILE_BORDER @Color.RED      ; processing after the draw
+    call @Input.get_pressed
+    bit @Input.FIRE,a
+    jp nz,@Pause.start          ; pause
+    call update
     PROFILE_BORDER @Color.BLACK    ; idle until the next frame
     jr event_loop
 
@@ -203,6 +207,11 @@ draw:
     ld (shown_time),hl
     ld de,@Screen.bitmap + @Header.TIME_COLUMN
     jp @Screen.print_time
+
+; Act on the inputs held (Input.held): nothing yet.
+; Entry: none.  Exit: none.
+update:
+    ret
 
 best_text:
     DB "Best"

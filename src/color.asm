@@ -22,5 +22,6 @@ WALL_ATTR     EQU WHITE | RED << 3              ; walls: white on red
 FLOOR_ATTR    EQU YELLOW | BLUE << 3 | BRIGHT   ; floor: bulldozer and crates
 TARGET_ATTR   EQU GREEN | BLUE << 3 | BRIGHT    ; floor with a target
 OUTSIDE_ATTR  EQU BLACK | BLACK << 3            ; outside the walls: black
+MENU_BORDER_ATTR EQU BLACK | WHITE << 3         ; the pause menu's border
 
     ENDMODULE

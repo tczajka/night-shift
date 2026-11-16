@@ -235,6 +235,63 @@ paint_tile:
     ld (de),a
     ret
 
+; Clear a rectangle of character cells: set all its pixels to 0 (paper).
+; Leaves attributes unchanged.
+; Entry: B = top row, C = left column, D = height in rows (at least 1),
+; E = width in columns (at least 1).
+; Exit: none.  Clobbers: A, BC, DE, HL.
+clear_cells:
+    ld a,e                      ; A = width
+.row:
+    push bc
+    push de
+    push af
+    call char_address           ; HL = the row's top left pixel line
+    ex de,hl
+    pop af
+    ld c,8                      ; pixel lines
+.line:
+    push hl
+    ld b,a
+.byte:
+    ld (hl),0
+    inc l
+    djnz .byte
+    pop hl
+    inc h                       ; next pixel line of the cells
+    dec c
+    jr nz,.line
+    pop de
+    pop bc
+    inc b                       ; next row
+    dec d
+    jr nz,.row
+    ret
+
+; Set the attributes of a rectangle of character cells.
+; Entry: A = attribute, B = top row, C = left column, D = height in rows
+; (at least 1), E = width in columns (at least 1).
+; Exit: none.  Clobbers: A, BC, DE, HL.
+paint_cells:
+    ld h,a                      ; H = attribute
+    ld l,e                      ; L = width
+.row:
+    push bc
+    push de
+    call attr_address
+    ld b,l
+    ld a,h
+.cell:
+    ld (de),a
+    inc e                       ; a row of attributes is within a page
+    djnz .cell
+    pop de
+    pop bc
+    inc b                       ; next row
+    dec d
+    jr nz,.row
+    ret
+
 ; Bitmap address of the top pixel line of a character cell. The cell's other
 ; 7 lines follow at D + 1 ... D + 7, with E unchanged.
 ; Entry: B = row (0-23), C = column (0-31).
