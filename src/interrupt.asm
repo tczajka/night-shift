@@ -41,7 +41,10 @@ init:
 handler:
     push af
     push bc
+    push hl
     call @Input.scan
+    call @Level.time_tick
+    pop hl
     pop bc
     pop af
     ei

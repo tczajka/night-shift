@@ -41,6 +41,8 @@ BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
     ld a,':'
     call @Screen.print_char
 
+    xor a                       ; time_running is clear: nothing ticks
+    ld (@Level.time_frames),a
     ld hl,0                     ; no pushes, no time yet
     ld (@Level.pushes),hl
     ld (@Level.time),hl
@@ -49,6 +51,9 @@ BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
     ld (shown_time),hl
 
     call @Input.reset           ; ignore inputs from before the finished screen
+
+    ld a,1                      ; start the time
+    ld (@Level.time_running),a
 
 event_loop:
     halt

@@ -62,6 +62,38 @@ high_score_address:
     ld h,a
     ret
 
+; If `time_running`, advance the current level's time by 1/50 of a second,
+; i.e. one frame: count frames in `time_frames`, and every 50 add a second
+; to `time`. The time stops at 99:59. Called by the frame interrupt.
+; Entry: none.  Exit: none.  Clobbers: A, HL.
+time_tick:
+    ld a,(time_running)
+    or a
+    ret z                       ; stopped
+    ld hl,time_frames
+    inc (hl)
+    ld a,(hl)
+    cp 50
+    ret c                       ; not a whole second yet
+    ld (hl),0
+    ld hl,(time)                ; H = minutes, L = seconds
+    ld a,l
+    add a,1                     ; next second, in BCD
+    daa
+    cp 0x60
+    jr c,.seconds_done
+    ld a,h                      ; seconds 59 -> 00: next minute
+    cp 0x99
+    ret z                       ; already 99:59: stay there
+    add a,1
+    daa
+    ld h,a
+    xor a
+.seconds_done:
+    ld l,a
+    ld (time),hl
+    ret
+
 solved_bcd: DW 0                ; number of solved levels in BCD (0x0000-0x0100)
 
 ; The current level.
@@ -74,5 +106,7 @@ best_time:   DW NO_SCORE
 ; Its pushes and time so far, in BCD like the high scores.
 pushes: DW 0
 time:   DW 0                    ; 0xMMSS, minutes:seconds
+time_frames:  DB 0              ; frames (1/50 s) since `time` last changed, 0-49
+time_running: DB 0              ; nonzero: time_tick advances the time
 
     ENDMODULE
