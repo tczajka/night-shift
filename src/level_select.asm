@@ -61,11 +61,11 @@ print_levels:
     pop af
     add a,1                     ; next level, in BCD
     daa
-    ASSERT @Level.COUNT == 100
+    ASSERT @Levels.COUNT == 100
     jr nc,.level                ; until 99 wraps to 00
     ret
 
-; Print the number of solved levels (Level.solved_bcd) in row 23:
+; Print the number of solved levels (Levels.solved_bcd) in row 23:
 ; "Solved: 000".
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 print_solved:
@@ -75,7 +75,7 @@ print_solved:
     ld b,SOLVED_TEXT_LEN
     call @Screen.print_string
     inc e                       ; skip a space
-    ld hl,(@Level.solved_bcd)
+    ld hl,(@Levels.solved_bcd)
     jp @Screen.print_digits_3
 
 ; Show the current level (Level.number_bcd) as selected, if it isn't
@@ -186,7 +186,7 @@ level_cell:
 ; Entry: A = level number in BCD.  Exit: A = attribute.  Clobbers: BC, HL.
 normal_attr:
     call @Math.from_bcd
-    call @Level.is_solved
+    call @Levels.is_solved
     ld a,@Color.TEXT_ATTR
     ret z
     ld a,@Color.SOLVED_ATTR

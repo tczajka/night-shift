@@ -18,7 +18,7 @@ in Z80 assembly. See `README.md` for the player-facing description.
   real timing, which border profiling needs.
 - `tools/levels.py` (Python 3, standard library only) builds
   `build/levels.bin` from `LEVEL_SOURCES` in the Makefile, with a report
-  of every level in `build/levels.txt`; `src/main.asm` includes it.
+  of every level in `build/levels.txt`; `src/levels.asm` includes it.
 - `make PROFILE=1` (or `make run PROFILE=1`) defines `PROFILE`, enabling
   the `PROFILE_BORDER` colour markers from `src/profile.asm`.
 - The assembler flags make warnings errors: a build must produce none.
@@ -31,9 +31,10 @@ in Z80 assembly. See `README.md` for the player-facing description.
   inside routines.
 - All game code and data go between `code` and `code_end` in
   `main.asm`: only that range is saved to tape.
-- Includes: `profile.asm` (macros) first, then the level data (it must
-  start at `code`), then the code, including `color.asm` (constants
-  only), then `alloc.asm` and `tape.asm` last.
+- Includes: `profile.asm` (macros) first, then `levels.asm` (its data is
+  page-aligned, so at `code` the ALIGN adds nothing), then the rest of the
+  code, including `color.asm` (constants only), then `alloc.asm` and
+  `tape.asm` last.
 - Refer to labels in other modules with `@` (e.g. `@Alloc.stack_end`).
   It is required inside a `MODULE`: there a plain reference to a label
   defined later is first taken as module-local, which leaves bogus

@@ -1,9 +1,6 @@
-; Levels and their high scores (see Alloc.high_scores).
+; The current level: its number, high scores, board, pushes and time.
 
     MODULE Level
-
-COUNT       EQU 100             ; levels are numbered 00-99
-NO_SCORE    EQU 0xFFFF          ; pushes and time of a level not solved yet
 
 ; The board (Alloc.board), in squares. A position is row * WIDTH + column.
 WIDTH       EQU 16
@@ -18,25 +15,6 @@ CRATE       EQU 0x08
 NO_SQUARE   EQU 0xFF            ; not a position
     ASSERT WIDTH * HEIGHT <= NO_SQUARE
 
-; Mark every level as not solved yet: set all high scores to NO_SCORE.
-; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
-init:
-    ld hl,@Alloc.high_scores
-    ld bc,@Alloc.high_scores_end - @Alloc.high_scores
-    ASSERT NO_SCORE == 0xFFFF   ; both bytes the same
-    ld a,NO_SCORE & 0xFF
-    call @Memory.fill
-
-    ; TEMPORARY: level 13 solved in 2718 pushes, 31:41.
-.TEST_SCORE EQU @Alloc.high_scores + 13 * 4
-    ld hl,0x2718
-    ld (.TEST_SCORE),hl         ; pushes
-    ld hl,0x3141
-    ld (.TEST_SCORE + 2),hl     ; time
-    ld hl,0x0001
-    ld (solved_bcd),hl
-    ret
-
 ; Make a level the current one: set `number_bcd` and `number`, and copy its
 ; high scores to `best_pushes` and `best_time`.
 ; Entry: A = level number in BCD (0x00-0x99).
@@ -45,54 +23,20 @@ select:
     ld (number_bcd),a
     call @Math.from_bcd
     ld (number),a
-    call high_score_address
+    call @Levels.high_score_address
     ld de,best_pushes
     ld bc,4                     ; pushes and time
     ldir
     ret
 
-; Whether a level is solved, i.e. its high scores aren't NO_SCORE.
-; Entry: A = level number in binary (0-99).
-; Exit: Z if not solved, NZ if solved.  Clobbers: A, HL.
-is_solved:
-    call high_score_address
-    ld a,(hl)                   ; low byte of best pushes
-    ASSERT (NO_SCORE & 0xFF) == 0xFF    ; no BCD byte is 0xFF
-    inc a
-    ret
-
-; Address of a level's entry in Alloc.high_scores.
-; Entry: A = level number in binary (0-99).
-; Exit: HL = address.  Clobbers: A.
-high_score_address:
-    ld l,a                      ; HL = number * 4
-    ld h,0
-    add hl,hl
-    add hl,hl
-    ld a,h                      ; + high_scores
-    ASSERT (@Alloc.high_scores & 0xFF) == 0
-    add a,@Alloc.high_scores >> 8
-    ld h,a
-    ret
-
-; Load the current level (`number`) from the level data (`levels` in
-; main.asm): set up the board (see mark_floor) and the bulldozer, facing
-; right, and set the pushes and time to 0. Call it with the time stopped
-; (`time_running` clear).
+; Load the current level (`number`) from the level data (Levels.data): set
+; up the board (see mark_floor) and the bulldozer, facing right, and set the
+; pushes and time to 0. Call it with the time stopped (`time_running`
+; clear).
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 load:
-    ld a,(number)               ; HL = the level's index entry
-    add a,a
-    ld l,a
-    ASSERT (@levels & 0xFF) == 0
-    ASSERT 2 * COUNT <= 0x100   ; the index is within the page
-    ld h,@levels >> 8
-    ld e,(hl)                   ; HL = levels + the level's offset
-    inc l
-    ld a,(hl)
-    add a,@levels >> 8
-    ld h,a
-    ld l,e
+    ld a,(number)
+    call @Levels.address
 
     ld c,(hl)                   ; C = number of crates (and of targets)
     inc hl
@@ -233,14 +177,12 @@ offsets_end:
     ASSERT @Math.RIGHT == 0 && @Math.LEFT == 1
     ASSERT @Math.DOWN == 2 && @Math.UP == 3
 
-solved_bcd: DW 0                ; number of solved levels in BCD (0x0000-0x0100)
-
 ; The current level.
 number_bcd: DB 0                ; level number in BCD
 number:     DB 0                ; level number in binary
 ; Its high scores, laid out like an entry of Alloc.high_scores.
-best_pushes: DW NO_SCORE
-best_time:   DW NO_SCORE
+best_pushes: DW @Levels.NO_SCORE
+best_time:   DW @Levels.NO_SCORE
     ASSERT best_time == best_pushes + 2
 time_running: DB 0              ; nonzero: time_tick advances the time
 

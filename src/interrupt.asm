@@ -1,8 +1,8 @@
 ; Interrupt handling: replaces the ROM's IM 1 handler with our own, in IM 2.
 ;
-; In IM 2 the Z80 jumps through a vector read from I * 256 + (data bus
+; In IM 2 the Z80 jumps through a vector read from I * 0x100 + (data bus
 ; byte). On the Spectrum the data bus value during the interrupt is not
-; reliable, so the vector table (Alloc.interrupt_vectors) is 257 bytes all
+; reliable, so the vector table (Alloc.interrupt_vectors) is 0x101 bytes all
 ; set to VECTOR_BYTE: every possible vector then reads Alloc.interrupt_entry,
 ; where a JP to the handler is placed. Both are built at run time, so they
 ; take no space on tape.
@@ -25,7 +25,7 @@ init:
     ld hl,@Alloc.interrupt_vectors
     ld bc,@Alloc.interrupt_vectors_end - @Alloc.interrupt_vectors
     ld a,VECTOR_BYTE
-    call @Memory.fill           ; fill all 257 bytes
+    call @Memory.fill           ; fill all 0x101 bytes
     ld a,0xC3                   ; JP nn
     ld (@Alloc.interrupt_entry),a
     ld hl,handler

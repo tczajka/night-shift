@@ -26,10 +26,10 @@
 
 ; High scores: for each level, best pushes then best time, each
 ; a little-endian word of 4 BCD digits (time is 0xMMSS, minutes:seconds).
-; Level.NO_SCORE in both means the level isn't solved yet; it compares as
-; worse than any real score. Set to Level.NO_SCORE by Level.init.
+; Levels.NO_SCORE in both means the level isn't solved yet; it compares as
+; worse than any real score. Set to Levels.NO_SCORE by Levels.init.
 high_scores:
-    DS @Level.COUNT * 4
+    DS @Levels.COUNT * 4
 high_scores_end:
 
     ORG 0xA200
@@ -69,11 +69,11 @@ stack_end:
 interrupt_entry:
     DS 3
 
-; IM 2 vector table: 257 bytes, all equal to the low byte of
-; interrupt_entry. Must start on a 256-byte boundary.
+; IM 2 vector table: 0x101 bytes, all equal to the low byte of
+; interrupt_entry. Must start on a 0x100-byte boundary.
 interrupt_vectors:
     ASSERT (interrupt_vectors & 0xFF) == 0
-    DS 257
+    DS 0x101
 interrupt_vectors_end:
 
     ENDMODULE

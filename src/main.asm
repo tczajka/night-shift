@@ -17,14 +17,7 @@ uninit_cur  DEFL uninit
 
     INCLUDE "profile.asm"       ; macros only, no code
 
-; The levels, built by tools/levels.py (design/level-format.md): an index of
-; 100 offsets from `levels`, then the levels. First in the code, so they
-; start on a page boundary: the index is within one page and an offset just
-; adds to the high byte (see Level.load).
-levels:
-    INCBIN "../build/levels.bin"
-levels_end:
-
+    INCLUDE "levels.asm"        ; first: its data is page-aligned
     INCLUDE "start.asm"         ; entry point
     INCLUDE "memory.asm"
     INCLUDE "math.asm"

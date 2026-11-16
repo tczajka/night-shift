@@ -3,7 +3,7 @@
 ; The bitmap is not linear: for character row r (0-23), column c (0-31)
 ; and pixel line y (0-7) of the cell, the address is
 ;   0x4000 | (r & 0x18) << 8 | y << 8 | (r & 7) << 5 | c
-; so the 8 lines of a character cell are 256 bytes apart.
+; so the 8 lines of a character cell are 0x100 bytes apart.
 
     MODULE Screen
 
@@ -96,7 +96,7 @@ print_digits_2:
     ; fall through
 
 ; Draw a decimal digit from the ROM font, or '-' for 0xF, so that
-; Level.NO_SCORE shows as dashes. Leaves the attribute unchanged.
+; Levels.NO_SCORE shows as dashes. Leaves the attribute unchanged.
 ; Entry: A = digit (0-9, or 0xF) in the low 4 bits; the high 4 bits are
 ; ignored. DE = address of the cell (see char_address).
 ; Exit: DE = address of the next cell (see print_char).
