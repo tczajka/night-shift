@@ -12,36 +12,8 @@ start:
     ld a,@Color.TEXT_ATTR
     call @Screen.clear
 
-    call @Header.print_labels   ; row 0: "Level", "Pushes", "Time", ':'
-
-    ; Show the current level (Level.number_bcd).
-    ld de,@Alloc.screen_bitmap + @Header.LEVEL_COLUMN   ; row 0
-    ld a,(@Level.number_bcd)
-    call @Screen.print_digits_2
-
-    ; Row 1: the level's best pushes and time, each under the header's
-    ; and labelled "Best" under "Pushes" and "Time".
-    ASSERT BEST_ROW < 8
-BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
-    ld de,BEST_LINE + @Header.PUSHES_LABEL_COLUMN
-    ld hl,best_text
-    ld b,BEST_TEXT_LEN
-    call @Screen.print_string
-    ld de,BEST_LINE + @Header.PUSHES_COLUMN
-    ld hl,(@Level.best_pushes)
-    call @Screen.print_digits_4
-    ld de,BEST_LINE + @Header.TIME_LABEL_COLUMN
-    ld hl,best_text
-    ld b,BEST_TEXT_LEN
-    call @Screen.print_string
-    ld de,BEST_LINE + @Header.TIME_COLUMN
-    ld hl,(@Level.best_time)
-    call @Screen.print_time
-    ld de,BEST_LINE + @Header.TIME_COLUMN + 2
-    ld a,':'
-    call @Screen.print_char
-
-    ld hl,NONE                  ; not shown yet: draw shows them
+    call init_top_lines         ; header and "Best" line
+    ld hl,NONE                  ; pushes and time not shown yet: draw shows them
     ld (shown_pushes),hl
     ld (shown_time),hl
 
@@ -83,6 +55,40 @@ draw:
     ld (shown_time),hl
     ld de,@Alloc.screen_bitmap + @Header.TIME_COLUMN
     jp @Screen.print_time
+
+; Set up the top two lines: the header (row 0) with the level number, and
+; the "Best" line (row 1). The pushes and time in the header are left to
+; draw.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+init_top_lines:
+    call @Header.print_labels   ; row 0: "Level", "Pushes", "Time", ':'
+
+    ; Show the current level (Level.number_bcd).
+    ld de,@Alloc.screen_bitmap + @Header.LEVEL_COLUMN   ; row 0
+    ld a,(@Level.number_bcd)
+    call @Screen.print_digits_2
+
+    ; Row 1: the level's best pushes and time, each under the header's
+    ; and labelled "Best" under "Pushes" and "Time".
+    ASSERT BEST_ROW < 8
+BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
+    ld de,BEST_LINE + @Header.PUSHES_LABEL_COLUMN
+    ld hl,best_text
+    ld b,BEST_TEXT_LEN
+    call @Screen.print_string
+    ld de,BEST_LINE + @Header.PUSHES_COLUMN
+    ld hl,(@Level.best_pushes)
+    call @Screen.print_digits_4
+    ld de,BEST_LINE + @Header.TIME_LABEL_COLUMN
+    ld hl,best_text
+    ld b,BEST_TEXT_LEN
+    call @Screen.print_string
+    ld de,BEST_LINE + @Header.TIME_COLUMN
+    ld hl,(@Level.best_time)
+    call @Screen.print_time
+    ld de,BEST_LINE + @Header.TIME_COLUMN + 2
+    ld a,':'
+    jp @Screen.print_char
 
 best_text:
     DB "Best"
