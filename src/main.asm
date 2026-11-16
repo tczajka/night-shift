@@ -29,6 +29,15 @@ start:
     INCLUDE "splash.asm"
     INCLUDE "level_select.asm"
     INCLUDE "play.asm"
+
+; The levels, built by tools/levels.py (design/level-format.md): an index of
+; 100 offsets from `levels`, then the levels. Last in the code, on a page
+; boundary, so the index is within one page and an offset just adds to the
+; high byte (see Level.load).
+    ALIGN 256
+levels:
+    INCBIN "../build/levels.bin"
+levels_end:
 code_end:
     INCLUDE "alloc.asm"
     INCLUDE "tape.asm"

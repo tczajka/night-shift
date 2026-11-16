@@ -6,6 +6,7 @@
 ;   5B00-7FFF  BASIC
 ;   8000-....  code (code_start..code_end), loaded from tape
 ;   A000-A18F  high scores
+;   A200-A2B5  current level
 ;   E000-EFFF  stack (4KB)
 ;   FDFD-FDFF  interrupt entry
 ;   FE00-FF00  interrupt table
@@ -40,8 +41,26 @@ high_scores:
     DS @Level.COUNT * 4
 high_scores_end:
 
-    ORG 0xE000
+    ORG 0xA200
     ASSERT high_scores_end <= $
+
+; The current level, set up by Level.load.
+; Board: 16x11 squares, row by row, one byte each, made of Level.WALL,
+; Level.TARGET and Level.CRATE. Starts on a page boundary, so the low byte
+; of a square's address is its position (row * 16 + column).
+board:
+    ASSERT (board & 0xFF) == 0
+    DS @Level.WIDTH * @Level.HEIGHT
+board_end:
+    ASSERT board_end - board <= 0x100
+bulldozer:   DS 1               ; position of the bulldozer
+pushes:      DS 2               ; pushes so far, BCD
+time:        DS 2               ; time so far, BCD 0xMMSS (minutes:seconds)
+time_frames: DS 1               ; frames (1/50 s) since `time` last changed, 0-49
+level_end:
+
+    ORG 0xE000
+    ASSERT level_end <= $
 
 ; Stack: SP starts at stack_end (set by `start`) and grows down towards
 ; stack. Uncontended memory, so pushes and calls run at full speed.

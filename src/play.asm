@@ -9,6 +9,8 @@ BEST_ROW    EQU 1               ; "Best" line, below the header
 NONE        EQU 0xFFFF          ; no number shown yet (not valid BCD)
 
 start:
+    call @Level.load
+
     ld a,ATTR
     call @Screen.clear
 
@@ -41,11 +43,6 @@ BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
     ld a,':'
     call @Screen.print_char
 
-    xor a                       ; time_running is clear: nothing ticks
-    ld (@Level.time_frames),a
-    ld hl,0                     ; no pushes, no time yet
-    ld (@Level.pushes),hl
-    ld (@Level.time),hl
     ld hl,NONE                  ; not shown yet: draw shows them
     ld (shown_pushes),hl
     ld (shown_time),hl
@@ -63,12 +60,12 @@ event_loop:
     PROFILE_BORDER @Screen.BLACK    ; idle until the next frame
     jr event_loop
 
-; Show the level's pushes and time (Level.pushes, Level.time) in the
+; Show the level's pushes and time (Alloc.pushes, Alloc.time) in the
 ; header, each only if it has changed since it was last shown.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw:
     ; show pushes
-    ld hl,(@Level.pushes)
+    ld hl,(@Alloc.pushes)
     ld de,(shown_pushes)
     or a
     sbc hl,de
@@ -79,7 +76,7 @@ draw:
     call @Screen.print_digits_4
 .pushes_done:
     ; show time
-    ld hl,(@Level.time)
+    ld hl,(@Alloc.time)
     ld de,(shown_time)
     or a
     sbc hl,de

@@ -18,7 +18,7 @@ in Z80 assembly. See `README.md` for the player-facing description.
   real timing, which border profiling needs.
 - `tools/levels.py` (Python 3, standard library only) builds
   `build/levels.bin` from `LEVEL_SOURCES` in the Makefile, with a report
-  of every level in `build/levels.txt`; `src/level.asm` includes it.
+  of every level in `build/levels.txt`; `src/main.asm` includes it.
 - `make PROFILE=1` (or `make run PROFILE=1`) defines `PROFILE`, enabling
   the `PROFILE_BORDER` colour markers from `src/profile.asm`.
 - The assembler flags make warnings errors: a build must produce none.
