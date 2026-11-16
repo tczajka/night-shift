@@ -16,9 +16,12 @@ binary format.
 | `@` | player |
 | `+` | player on a target |
 
-Each level must fit the 16×11 board, have exactly one player, as many
-crates as targets, and be enclosed by walls. There must be exactly 100
-levels.
+`tools/levels.py` reads the levels in order and uses the first 100 that
+fit the 16×11 board. A level that fits only when turned on its side (at
+most 11 wide and 16 high) has its x and y swapped, which doesn't change
+the puzzle; a level that doesn't fit either way is skipped. Every level
+used must have exactly one player, as many crates as targets (at least
+one), and be enclosed by walls.
 
 ## Cells
 
