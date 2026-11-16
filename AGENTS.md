@@ -29,7 +29,7 @@ in Z80 assembly. See `README.md` for the player-facing description.
 - `src/main.asm` is the only file passed to sjasmplus; everything else is
   `INCLUDE`d. Wrap each included file in `MODULE <Name>`; use `.local` labels
   inside routines.
-- All game code and data go between `code_start` and `code_end` in
+- All game code and data go between `init` and `init_end` in
   `main.asm`: only that range is saved to tape.
 - Includes: macro-only files (`profile.asm`) first, then the code, then
   the constants-only files (`color.asm`, `alloc.asm`), then `tape.asm`

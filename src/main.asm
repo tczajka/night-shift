@@ -5,18 +5,17 @@
 
     INCLUDE "profile.asm"         ; macros only, no code
 
-; Where the next initialized and uninitialized bytes go: switch between
-; them with ORG, saving the current position (DEFL) first. Initialized
-; bytes go to the code (code_start..code_end, saved to tape), uninitialized
-; ones to RAM set up at run time (see Alloc).
-init_addr   DEFL 0x8000         ; above contended memory
-uninit_addr DEFL 0xA300
+; Two sections: initialized bytes (init..init_end: all game code and data,
+; saved to tape as one CODE block) and uninitialized ones (from uninit: RAM
+; set up at run time, see Alloc). init and uninit are where they begin;
+; init_cur and uninit_cur are where the next bytes go. Switch between them
+; with ORG, saving the current position (DEFL) first.
+init        EQU 0x8000          ; above contended memory
+uninit      EQU 0xA300
+init_cur    DEFL init
+uninit_cur  DEFL uninit
 
-    ORG init_addr
-
-; Everything between code_start and code_end is saved to tape as one CODE
-; block. All game code and data must be included inside this range.
-code_start:
+    ORG init_cur
 
 ; The levels, built by tools/levels.py (design/level-format.md): an index of
 ; 100 offsets from `levels`, then the levels. First in the code, so they
@@ -46,7 +45,10 @@ start:
     INCLUDE "splash.asm"
     INCLUDE "level_select.asm"
     INCLUDE "play.asm"
-code_end:
+init_end:
+init_cur DEFL $                 ; the end of the initialized section
     INCLUDE "color.asm"
     INCLUDE "alloc.asm"
     INCLUDE "tape.asm"
+
+    ASSERT init_cur <= uninit

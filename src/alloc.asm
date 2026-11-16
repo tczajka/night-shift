@@ -4,10 +4,10 @@
 ;   4000-57FF  screen bitmap (Screen.bitmap)
 ;   5800-5AFF  screen attributes (Screen.attrs)
 ;   5B00-7FFF  BASIC
-;   8000-....  code (code_start..code_end), loaded from tape
+;   8000-....  code and data (init..init_end), loaded from tape
 ;   A000-A18F  high scores
 ;   A200-A2B6  current level
-;   A300-....  uninitialized variables (uninit_addr, see main.asm)
+;   A300-....  uninitialized variables (uninit, see main.asm)
 ;   E000-EFFF  stack (4KB)
 ;   FDFD-FDFF  interrupt entry
 ;   FE00-FF00  interrupt table
@@ -19,10 +19,10 @@
 
     MODULE Alloc
 
-    ; code_start..code_end (see main.asm)
+    ; init..init_end (see main.asm)
 
     ORG 0xA000
-    ASSERT @code_end <= $
+    ASSERT @init_end <= $
 
 ; High scores: for each level, best pushes then best time, each
 ; a little-endian word of 4 BCD digits (time is 0xMMSS, minutes:seconds).
@@ -50,10 +50,10 @@ pushes:      DS 2               ; pushes so far, BCD
 time:        DS 2               ; time so far, BCD 0xMMSS (minutes:seconds)
 time_frames: DS 1               ; frames (1/50 s) since `time` last changed, 0-49
 level_end:
-    ASSERT level_end <= 0xA300  ; uninit_addr starts there (see main.asm)
+    ASSERT level_end <= @uninit
 
     ORG 0xE000
-    ASSERT @uninit_addr <= $
+    ASSERT @uninit_cur <= $
 
 ; Stack: SP starts at stack_end (set by `start`) and grows down towards
 ; stack. Uncontended memory, so pushes and calls run at full speed.

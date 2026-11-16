@@ -8,7 +8,7 @@
     MODULE Screen
 
 ; Screen memory.
-@init_addr DEFL $
+@init_cur DEFL $
     ORG 0x4000
 bitmap:                         ; see above for the line order
     DS 0x1800
@@ -16,7 +16,8 @@ bitmap_end:
 attrs:                          ; one byte per character cell, row by row
     DS 0x300
 attrs_end:
-    ORG @init_addr
+    ASSERT attrs_end <= @init
+    ORG @init_cur
 
 FONT        EQU 0x3C00          ; ROM font, 8 bytes per character, indexed from
                                 ; character 0; only 32-127 exist (from 0x3D00)

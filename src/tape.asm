@@ -20,7 +20,7 @@
 ; which moves with the size of the level data in front of it. The others
 ; are fixed: the ASSERT keeps them in step with the code.
 
-    ASSERT code_start == 32768  ; LOAD "" CODE loads here; CLEAR just below
+    ASSERT init == 32768        ; LOAD "" CODE loads here; CLEAR just below
 
     MODULE Tape
 
@@ -74,6 +74,6 @@ screen_end:
     EMPTYTAP "nightshift.tap"
     SAVETAP "nightshift.tap", BASIC, "NightShift", basic, basic_end - basic, 10
     SAVETAP "nightshift.tap", CODE, "Screen", screen, screen_end - screen
-    SAVETAP "nightshift.tap", CODE, "NightShift", @code_start, @code_end - @code_start
+    SAVETAP "nightshift.tap", CODE, "NightShift", @init, @init_end - @init
 
     ENDMODULE
