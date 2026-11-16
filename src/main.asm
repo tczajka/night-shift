@@ -39,5 +39,6 @@ levels:
     INCBIN "../build/levels.bin"
 levels_end:
 code_end:
+    INCLUDE "color.asm"
     INCLUDE "alloc.asm"
     INCLUDE "tape.asm"

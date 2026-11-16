@@ -10,17 +10,6 @@
 FONT        EQU 0x3C00          ; ROM font, 8 bytes per character, indexed from
                                 ; character 0; only 32-127 exist (from 0x3D00)
 
-; Colours, for attributes: ink | paper << 3 | BRIGHT.
-BLACK       EQU 0
-BLUE        EQU 1
-RED         EQU 2
-MAGENTA     EQU 3
-GREEN       EQU 4
-CYAN        EQU 5
-YELLOW      EQU 6
-WHITE       EQU 7
-BRIGHT      EQU 0x40
-
 ; Set every attribute to A, then clear the bitmap. The attributes go first
 ; and take under a third of a frame, so the colours change almost at once;
 ; clearing the bitmap then takes about two frames.

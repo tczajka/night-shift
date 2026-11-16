@@ -2,8 +2,6 @@
 
     MODULE Play
 
-ATTR        EQU @Screen.WHITE | @Screen.BLACK << 3 | @Screen.BRIGHT
-
 BEST_ROW    EQU 1               ; "Best" line, below the header
 
 NONE        EQU 0xFFFF          ; no number shown yet (not valid BCD)
@@ -11,7 +9,7 @@ NONE        EQU 0xFFFF          ; no number shown yet (not valid BCD)
 start:
     call @Level.load
 
-    ld a,ATTR
+    ld a,@Color.TEXT_ATTR
     call @Screen.clear
 
     call @Header.print_labels   ; row 0: "Level", "Pushes", "Time", ':'
@@ -54,10 +52,10 @@ BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
 
 event_loop:
     halt
-    PROFILE_BORDER @Screen.BLUE     ; drawing
+    PROFILE_BORDER @Color.BLUE     ; drawing
     call draw
-    PROFILE_BORDER @Screen.RED      ; processing after the draw (none yet)
-    PROFILE_BORDER @Screen.BLACK    ; idle until the next frame
+    PROFILE_BORDER @Color.RED      ; processing after the draw (none yet)
+    PROFILE_BORDER @Color.BLACK    ; idle until the next frame
     jr event_loop
 
 ; Show the level's pushes and time (Alloc.pushes, Alloc.time) in the

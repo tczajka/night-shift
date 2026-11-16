@@ -2,14 +2,10 @@
 
     MODULE LevelSelect
 
-ATTR          EQU @Screen.WHITE | @Screen.BLACK << 3 | @Screen.BRIGHT
-SOLVED_ATTR   EQU @Screen.GREEN | @Screen.BLACK << 3 | @Screen.BRIGHT
-SELECTED_ATTR EQU @Screen.MAGENTA | @Screen.BLACK << 3 | @Screen.BRIGHT
-
 NONE        EQU 0xFF            ; no level (not valid BCD)
 
 start:
-    ld a,ATTR
+    ld a,@Color.TEXT_ATTR
     call @Screen.clear
 
     call @Header.print_labels   ; row 0: "Level", "Pushes", "Time", ':'
@@ -39,20 +35,20 @@ start:
 
 event_loop:
     halt
-    PROFILE_BORDER @Screen.BLUE     ; drawing
+    PROFILE_BORDER @Color.BLUE     ; drawing
     call draw
-    PROFILE_BORDER @Screen.RED      ; processing after the draw
+    PROFILE_BORDER @Color.RED      ; processing after the draw
     call @Input.get_pressed
     bit @Input.FIRE,a
     jp nz,@Play.start           ; play the current level
     call update
-    PROFILE_BORDER @Screen.BLACK    ; idle until the next frame
+    PROFILE_BORDER @Color.BLACK    ; idle until the next frame
     jr event_loop
 
 ; Show the current level (Level.number_bcd) as selected, if it isn't
 ; already: give the previously selected one back its normal colour, give
-; the current one SELECTED_ATTR, and print its number and best scores in
-; the header.
+; the current one Color.SELECTED_ATTR, and print its number and best
+; scores in the header.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw:
     ld a,(@Level.number_bcd)
@@ -69,7 +65,7 @@ draw:
 .select:
     ld a,(@Level.number_bcd)
     ld (shown_bcd),a
-    ld h,SELECTED_ATTR
+    ld h,@Color.SELECTED_ATTR
     call paint_level
 
     ; Header: the level's number and its best pushes and time.
@@ -157,15 +153,15 @@ print_levels:
     jr nc,.level                ; until 99 wraps to 00
     ret
 
-; The attribute of a level's number when it isn't selected: SOLVED_ATTR if
-; the level is solved, ATTR if not.
+; The attribute of a level's number when it isn't selected:
+; Color.SOLVED_ATTR if the level is solved, Color.TEXT_ATTR if not.
 ; Entry: A = level number in BCD.  Exit: A = attribute.  Clobbers: BC, HL.
 normal_attr:
     call @Math.from_bcd
     call @Level.is_solved
-    ld a,ATTR
+    ld a,@Color.TEXT_ATTR
     ret z
-    ld a,SOLVED_ATTR
+    ld a,@Color.SOLVED_ATTR
     ret
 
 ; Set the attribute of both cells of a level's number.

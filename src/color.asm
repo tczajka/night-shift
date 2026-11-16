@@ -1,0 +1,22 @@
+; Colours and attributes. Constants only, no code.
+
+    MODULE Color
+
+; Colours, for attributes and the border (port 0xFE).
+BLACK       EQU 0
+BLUE        EQU 1
+RED         EQU 2
+MAGENTA     EQU 3
+GREEN       EQU 4
+CYAN        EQU 5
+YELLOW      EQU 6
+WHITE       EQU 7
+
+; Attributes: ink | paper << 3 | BRIGHT.
+BRIGHT      EQU 0x40
+
+TEXT_ATTR     EQU WHITE | BLACK << 3 | BRIGHT   ; text, and the screen behind it
+SOLVED_ATTR   EQU GREEN | BLACK << 3 | BRIGHT   ; a solved level on level select
+SELECTED_ATTR EQU MAGENTA | BLACK << 3 | BRIGHT ; the selected level on level select
+
+    ENDMODULE
