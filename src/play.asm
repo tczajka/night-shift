@@ -67,11 +67,11 @@ BEST_LINE EQU @Screen.bitmap + BEST_ROW * 32 ; rows 0-7: just + 32
     ld a,':'
     jp @Screen.print_char
 
-; Draw the whole board (Alloc.board), every square (see draw_square), then
+; Draw the whole board (Level.board), every square (see draw_square), then
 ; the bulldozer on top, so it can redraw the board over anything.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw_board:
-    ld hl,@Alloc.board          ; L = position
+    ld hl,@Level.board          ; L = position
 .square:
     call draw_square
     inc l
@@ -80,13 +80,13 @@ draw_board:
     jr nz,.square
     ; fall through
 
-; Draw the bulldozer (Alloc.bulldozer), facing Alloc.facing, over its
+; Draw the bulldozer (Level.bulldozer), facing Level.facing, over its
 ; square. Leaves the square's attributes as they are.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw_bulldozer:
-    ld a,(@Alloc.bulldozer)
+    ld a,(@Level.bulldozer)
     call square_cell            ; B, C = cell
-    ld a,(@Alloc.facing)        ; HL = Sprite.bulldozer + facing * 32
+    ld a,(@Level.facing)        ; HL = Sprite.bulldozer + facing * 32
     rrca                        ; * 32 (facing < 8)
     rrca
     rrca
@@ -104,7 +104,7 @@ draw_bulldozer:
 ; - floor, in Color.TARGET_ATTR on a target and Color.FLOOR_ATTR otherwise:
 ;   a crate, else a target, else nothing;
 ; - outside the walls: nothing, in Color.OUTSIDE_ATTR.
-; Entry: HL = square in Alloc.board.
+; Entry: HL = square in Level.board.
 ; Exit: HL unchanged.  Clobbers: A, BC, DE.
 draw_square:
     push hl
@@ -178,12 +178,12 @@ square_cell:
     ld c,a
     ret
 
-; Show the level's pushes and time (Alloc.pushes, Alloc.time) in the
+; Show the level's pushes and time (Level.pushes, Level.time) in the
 ; header, each only if it has changed since it was last shown.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw:
     ; show pushes
-    ld hl,(@Alloc.pushes)
+    ld hl,(@Level.pushes)
     ld de,(shown_pushes)
     or a
     sbc hl,de
@@ -194,7 +194,7 @@ draw:
     call @Screen.print_digits_4
 .pushes_done:
     ; show time
-    ld hl,(@Alloc.time)
+    ld hl,(@Level.time)
     ld de,(shown_time)
     or a
     sbc hl,de

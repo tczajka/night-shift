@@ -2,8 +2,7 @@
 
     MODULE Math
 
-; Directions: Alloc.facing, Level.offsets, Sprite.bulldozer, and the bit
-; numbers of the direction inputs (see Input), in the Kempston layout.
+; Directions.
 RIGHT   EQU 0
 LEFT    EQU 1
 DOWN    EQU 2

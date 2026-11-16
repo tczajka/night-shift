@@ -1,5 +1,4 @@
-; The levels: the level data and the levels' high scores (see
-; Alloc.high_scores).
+; The levels: the level data and the levels' high scores.
 
     MODULE Levels
 
@@ -18,14 +17,14 @@ data_end:
 ; Mark every level as not solved yet: set all high scores to NO_SCORE.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 init:
-    ld hl,@Alloc.high_scores
-    ld bc,@Alloc.high_scores_end - @Alloc.high_scores
+    ld hl,high_scores
+    ld bc,high_scores_end - high_scores
     ASSERT NO_SCORE == 0xFFFF   ; both bytes the same
     ld a,NO_SCORE & 0xFF
     call @Memory.fill
 
     ; TEMPORARY: level 13 solved in 2718 pushes, 31:41.
-.TEST_SCORE EQU @Alloc.high_scores + 13 * 4
+.TEST_SCORE EQU high_scores + 13 * 4
     ld hl,0x2718
     ld (.TEST_SCORE),hl         ; pushes
     ld hl,0x3141
@@ -61,7 +60,7 @@ is_solved:
     inc a
     ret
 
-; Address of a level's entry in Alloc.high_scores.
+; Address of a level's entry in high_scores.
 ; Entry: A = level number in binary (0-99).
 ; Exit: HL = address.  Clobbers: A.
 high_score_address:
@@ -70,11 +69,27 @@ high_score_address:
     add hl,hl
     add hl,hl
     ld a,h                      ; + high_scores
-    ASSERT (@Alloc.high_scores & 0xFF) == 0
-    add a,@Alloc.high_scores >> 8
+    ASSERT (high_scores & 0xFF) == 0
+    add a,high_scores >> 8
     ld h,a
     ret
 
 solved_bcd: DW 0                ; number of solved levels in BCD (0x0000-0x0100)
+
+@code_cur DEFL $
+    ORG @uninit_cur
+
+; High scores: for each level, best pushes then best time, each a
+; little-endian word of 4 BCD digits (time is 0xMMSS, minutes:seconds).
+; NO_SCORE in both means the level isn't solved yet; it compares as worse
+; than any real score. Set to NO_SCORE by init. On a page boundary (see
+; high_score_address).
+    ALIGN 0x100
+high_scores:
+    DS COUNT * 4
+high_scores_end:
+
+@uninit_cur DEFL $
+    ORG @code_cur
 
     ENDMODULE

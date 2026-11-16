@@ -2,7 +2,7 @@
 
     MODULE Level
 
-; The board (Alloc.board), in squares. A position is row * WIDTH + column.
+; The board, in squares. A position is row * WIDTH + column.
 WIDTH       EQU 16
 HEIGHT      EQU 11
 
@@ -41,11 +41,11 @@ load:
     ld c,(hl)                   ; C = number of crates (and of targets)
     inc hl
     ld a,(hl)
-    ld (@Alloc.bulldozer),a
+    ld (bulldozer),a
     inc hl
 
     ; Walls: 1 bit per square, bit 7 first; this writes every square.
-    ld de,@Alloc.board          ; E = position
+    ld de,board                 ; E = position
     ld b,WIDTH * HEIGHT / 8
 .wall_byte:
     push bc
@@ -85,12 +85,12 @@ load:
 
     xor a
     ASSERT @Math.RIGHT == 0
-    ld (@Alloc.facing),a
-    ld (@Alloc.time_frames),a
+    ld (facing),a
+    ld (time_frames),a
     ld h,a
     ld l,a
-    ld (@Alloc.pushes),hl
-    ld (@Alloc.time),hl
+    ld (pushes),hl
+    ld (time),hl
     ret
 
 ; Mark the floor: set FLOOR on every square the bulldozer could reach if
@@ -101,10 +101,10 @@ load:
 ; Entry: the walls and the bulldozer set up.  Exit: none.
 ; Clobbers: A, BC, DE, HL.
 mark_floor:
-    ld h,@Alloc.board >> 8
+    ld h,board >> 8
     ld e,NO_SQUARE              ; marks the bottom of the squares to visit
     push de
-    ld a,(@Alloc.bulldozer)
+    ld a,(bulldozer)
     ld l,a
 .visit:                         ; L = position
     ld a,(hl)
@@ -136,21 +136,20 @@ mark_floor:
     ret
 
 ; If `time_running`, advance the current level's time by 1/50 of a second,
-; i.e. one frame: count frames in Alloc.time_frames, and every 50 add a
-; second to Alloc.time. The time stops at 99:59. Called by the frame
-; interrupt.
+; i.e. one frame: count frames in time_frames, and every 50 add a second
+; to time. The time stops at 99:59. Called by the frame interrupt.
 ; Entry: none.  Exit: none.  Clobbers: A, HL.
 time_tick:
     ld a,(time_running)
     or a
     ret z                       ; stopped
-    ld hl,@Alloc.time_frames
+    ld hl,time_frames
     inc (hl)
     ld a,(hl)
     cp 50
     ret c                       ; not a whole second yet
     ld (hl),0
-    ld hl,(@Alloc.time)         ; H = minutes, L = seconds
+    ld hl,(time)                ; H = minutes, L = seconds
     ld a,l
     add a,1                     ; next second, in BCD
     daa
@@ -165,7 +164,7 @@ time_tick:
     xor a
 .seconds_done:
     ld l,a
-    ld (@Alloc.time),hl
+    ld (time),hl
     ret
 
 ; Position offset of a step in each direction, indexed by the Math
@@ -180,10 +179,31 @@ offsets_end:
 ; The current level.
 number_bcd: DB 0                ; level number in BCD
 number:     DB 0                ; level number in binary
-; Its high scores, laid out like an entry of Alloc.high_scores.
+; Its high scores, laid out like an entry of Levels.high_scores.
 best_pushes: DW @Levels.NO_SCORE
 best_time:   DW @Levels.NO_SCORE
     ASSERT best_time == best_pushes + 2
 time_running: DB 0              ; nonzero: time_tick advances the time
+
+@code_cur DEFL $
+    ORG @uninit_cur
+
+; The current level, set up by load.
+; Board: 16x11 squares, row by row, one byte each, made of WALL, FLOOR,
+; TARGET and CRATE. On a page boundary, so the low byte of a square's
+; address is its position (row * 16 + column).
+    ALIGN 0x100
+board:
+    DS WIDTH * HEIGHT
+board_end:
+    ASSERT board_end - board <= 0x100
+bulldozer:   DS 1               ; position of the bulldozer
+facing:      DS 1               ; direction it faces: Math.RIGHT, LEFT, DOWN or UP
+pushes:      DS 2               ; pushes so far, BCD
+time:        DS 2               ; time so far, BCD 0xMMSS (minutes:seconds)
+time_frames: DS 1               ; frames (1/50 s) since `time` last changed, 0-49
+
+@uninit_cur DEFL $
+    ORG @code_cur
 
     ENDMODULE

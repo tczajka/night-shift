@@ -9,7 +9,7 @@
 ; code_cur and uninit_cur are where the next bytes go. Switch between them
 ; with ORG, saving the current position (DEFL) first.
 code        EQU 0x8000          ; above contended memory
-uninit      EQU 0xA300
+uninit      EQU 0xA000
 code_cur    DEFL code
 uninit_cur  DEFL uninit
 

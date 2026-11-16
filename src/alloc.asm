@@ -5,9 +5,8 @@
 ;   5800-5AFF  screen attributes (Screen.attrs)
 ;   5B00-7FFF  BASIC
 ;   8000-....  code and data (code..code_end), loaded from tape
-;   A000-A18F  high scores
-;   A200-A2B6  current level
-;   A300-....  uninitialized variables (uninit, see main.asm)
+;   A000-....  uninitialized variables (uninit, see main.asm): high scores
+;              (Levels.high_scores), current level (Level.board, ...)
 ;   E000-EFFF  stack (4KB)
 ;   FDFD-FDFF  interrupt entry
 ;   FE00-FF00  interrupt table
@@ -20,37 +19,7 @@
     MODULE Alloc
 
     ; code..code_end (see main.asm)
-
-    ORG 0xA000
-    ASSERT @code_end <= $
-
-; High scores: for each level, best pushes then best time, each
-; a little-endian word of 4 BCD digits (time is 0xMMSS, minutes:seconds).
-; Levels.NO_SCORE in both means the level isn't solved yet; it compares as
-; worse than any real score. Set to Levels.NO_SCORE by Levels.init.
-high_scores:
-    DS @Levels.COUNT * 4
-high_scores_end:
-
-    ORG 0xA200
-    ASSERT high_scores_end <= $
-
-; The current level, set up by Level.load.
-; Board: 16x11 squares, row by row, one byte each, made of Level.WALL,
-; Level.TARGET and Level.CRATE. Starts on a page boundary, so the low byte
-; of a square's address is its position (row * 16 + column).
-board:
-    ASSERT (board & 0xFF) == 0
-    DS @Level.WIDTH * @Level.HEIGHT
-board_end:
-    ASSERT board_end - board <= 0x100
-bulldozer:   DS 1               ; position of the bulldozer
-facing:      DS 1               ; direction it faces: Math.RIGHT, LEFT, DOWN or UP
-pushes:      DS 2               ; pushes so far, BCD
-time:        DS 2               ; time so far, BCD 0xMMSS (minutes:seconds)
-time_frames: DS 1               ; frames (1/50 s) since `time` last changed, 0-49
-level_end:
-    ASSERT level_end <= @uninit
+    ; uninit..uninit_cur (see main.asm)
 
     ORG 0xE000
     ASSERT @uninit_cur <= $
