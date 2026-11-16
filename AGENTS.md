@@ -90,10 +90,10 @@ slides smoothly to the next tile, so sprites are often not aligned to the
   crate on a target is shown by colour alone.
 - Green also marks solved levels and the solved-level header; the selected
   level uses a colour that is neither green nor yellow.
-- The crate fills its tile (ink, with paper-coloured frame and plank
-  lines, so adjacent crates show a seam). The bulldozer has 4 rotations and faces its
-  last move; its blade reaches the front tile edge so it stays in contact
-  with the crate during a push.
+- The crate fills its tile (ink, with a paper-coloured frame and X brace,
+  and a paper margin so adjacent crates show a seam). The bulldozer has 4
+  rotations and faces its last move; its blade reaches the front tile edge
+  so it stays in contact with the crate during a push.
 - Bulldozer and crate are drawn as opaque 16×16 blocks by one routine; no
   mask data. Horizontally shifted sprites merge their partial edge bytes
   with an edge mask derived from the shift.

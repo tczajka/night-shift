@@ -46,23 +46,23 @@ target:
     DG ................
     DG ................
 
-; Crate: fills its square, with a frame and planks drawn in paper. The paper
-; margin at the edge shows a seam between crates side by side.
+; Crate: fills its square, with a frame and an X brace drawn in paper. The
+; paper margin at the edge shows a seam between crates side by side.
 crate:
     DG ................
     DG .##############.
-    DG .##############.
-    DG .##..........##.
-    DG .##.########.##.
-    DG .##.########.##.
-    DG .##..........##.
-    DG .##.########.##.
-    DG .##.########.##.
-    DG .##..........##.
-    DG .##.########.##.
-    DG .##.########.##.
-    DG .##..........##.
-    DG .##############.
+    DG .#............#.
+    DG .#..########..#.
+    DG .#.#.######.#.#.
+    DG .#.##.####.##.#.
+    DG .#.###.##.###.#.
+    DG .#.####..####.#.
+    DG .#.####..####.#.
+    DG .#.###.##.###.#.
+    DG .#.##.####.##.#.
+    DG .#.#.######.#.#.
+    DG .#..########..#.
+    DG .#............#.
     DG .##############.
     DG ................
 
