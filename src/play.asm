@@ -41,14 +41,14 @@ init_status_lines:
     call @Header.print_labels   ; row 0: "Level", "Pushes", "Time", ':'
 
     ; Show the current level (Level.number_bcd).
-    ld de,@Alloc.screen_bitmap + @Header.LEVEL_COLUMN   ; row 0
+    ld de,@Screen.bitmap + @Header.LEVEL_COLUMN ; row 0
     ld a,(@Level.number_bcd)
     call @Screen.print_digits_2
 
     ; Row 1: the level's best pushes and time, each under the header's
     ; and labelled "Best" under "Pushes" and "Time".
     ASSERT BEST_ROW < 8
-BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
+BEST_LINE EQU @Screen.bitmap + BEST_ROW * 32 ; rows 0-7: just + 32
     ld de,BEST_LINE + @Header.PUSHES_LABEL_COLUMN
     ld hl,best_text
     ld b,BEST_TEXT_LEN
@@ -190,7 +190,7 @@ draw:
     jr z,.pushes_done
     add hl,de                   ; HL = pushes again
     ld (shown_pushes),hl
-    ld de,@Alloc.screen_bitmap + @Header.PUSHES_COLUMN  ; row 0
+    ld de,@Screen.bitmap + @Header.PUSHES_COLUMN ; row 0
     call @Screen.print_digits_4
 .pushes_done:
     ; show time
@@ -201,7 +201,7 @@ draw:
     ret z
     add hl,de                   ; HL = time again
     ld (shown_time),hl
-    ld de,@Alloc.screen_bitmap + @Header.TIME_COLUMN
+    ld de,@Screen.bitmap + @Header.TIME_COLUMN
     jp @Screen.print_time
 
 best_text:

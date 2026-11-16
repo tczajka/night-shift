@@ -1,8 +1,8 @@
 ; Memory layout (48K):
 ;
 ;   0000-3FFF  ROM
-;   4000-57FF  screen bitmap
-;   5800-5AFF  screen attributes
+;   4000-57FF  screen bitmap (Screen.bitmap)
+;   5800-5AFF  screen attributes (Screen.attrs)
 ;   5B00-7FFF  BASIC
 ;   8000-....  code (code_start..code_end), loaded from tape
 ;   A000-A18F  high scores
@@ -19,16 +19,6 @@
 
     MODULE Alloc
 
-; Screen memory.
-    ORG 0x4000
-screen_bitmap:                  ; see Screen for the line order
-    DS 0x1800
-screen_bitmap_end:
-screen_attrs:                   ; one byte per character cell
-    DS 0x300
-screen_attrs_end:
-
-    ASSERT $ <= @code_start
     ; code_start..code_end (see main.asm)
 
     ORG 0xA000

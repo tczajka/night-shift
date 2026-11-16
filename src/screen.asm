@@ -7,6 +7,17 @@
 
     MODULE Screen
 
+; Screen memory.
+@init_addr DEFL $
+    ORG 0x4000
+bitmap:                         ; see above for the line order
+    DS 0x1800
+bitmap_end:
+attrs:                          ; one byte per character cell, row by row
+    DS 0x300
+attrs_end:
+    ORG @init_addr
+
 FONT        EQU 0x3C00          ; ROM font, 8 bytes per character, indexed from
                                 ; character 0; only 32-127 exist (from 0x3D00)
 
@@ -15,11 +26,11 @@ FONT        EQU 0x3C00          ; ROM font, 8 bytes per character, indexed from
 ; clearing the bitmap then takes about two frames.
 ; Entry: A = attribute.  Exit: none.  Clobbers: A, BC, DE, HL.
 clear:
-    ld hl,@Alloc.screen_attrs
-    ld bc,@Alloc.screen_attrs_end - @Alloc.screen_attrs
+    ld hl,attrs
+    ld bc,attrs_end - attrs
     call @Memory.fill
-    ld hl,@Alloc.screen_bitmap
-    ld bc,@Alloc.screen_bitmap_end - @Alloc.screen_bitmap
+    ld hl,bitmap
+    ld bc,bitmap_end - bitmap
     xor a
     jp @Memory.fill
 
@@ -230,7 +241,7 @@ paint_tile:
 char_address:
     ld a,b                      ; D = 0x40 | (row & 0x18)
     and 0x18
-    or @Alloc.screen_bitmap >> 8
+    or bitmap >> 8
     ld d,a
     ld a,b                      ; E = (row & 7) << 5 | column
     and 7
@@ -242,7 +253,7 @@ char_address:
     ret
 
 ; Attribute address of a character cell. Attributes are linear: the address
-; is screen_attrs + row * 32 + column.
+; is attrs + row * 32 + column.
 ; Entry: B = row (0-23), C = column (0-31).
 ; Exit: DE = address.  Clobbers: A.
 attr_address:
@@ -254,10 +265,10 @@ attr_address:
     and 0xE0                    ; E = (row & 7) << 5 | column
     or c
     ld e,a
-    ld a,d                      ; D = high byte of screen_attrs + row >> 3
+    ld a,d                      ; D = high byte of attrs + row >> 3
     and 3
-    ASSERT (@Alloc.screen_attrs & 0x3FF) == 0   ; so OR adds row >> 3
-    or @Alloc.screen_attrs >> 8
+    ASSERT (attrs & 0x3FF) == 0 ; so OR adds row >> 3
+    or attrs >> 8
     ld d,a
     ret
 

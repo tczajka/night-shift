@@ -102,13 +102,13 @@ draw:
     call paint_level
 
     ; Header: the level's number and its best pushes and time.
-    ld de,@Alloc.screen_bitmap + @Header.LEVEL_COLUMN   ; row 0
+    ld de,@Screen.bitmap + @Header.LEVEL_COLUMN ; row 0
     ld a,(@Level.number_bcd)
     call @Screen.print_digits_2
-    ld de,@Alloc.screen_bitmap + @Header.PUSHES_COLUMN
+    ld de,@Screen.bitmap + @Header.PUSHES_COLUMN
     ld hl,(@Level.best_pushes)
     call @Screen.print_digits_4
-    ld de,@Alloc.screen_bitmap + @Header.TIME_COLUMN
+    ld de,@Screen.bitmap + @Header.TIME_COLUMN
     ld hl,(@Level.best_time)
     jp @Screen.print_time
 
