@@ -30,6 +30,54 @@ event_loop:
     PROFILE_BORDER @Color.BLACK    ; idle until the next frame
     jr event_loop
 
+; Print "Select level" in row 1.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+print_select_level:
+    ld bc,1 << 8 | 10           ; row 1, column 10
+    call @Screen.char_address
+    ld hl,select_level_text
+    ld b,SELECT_LEVEL_TEXT_LEN
+    jp @Screen.print_string
+
+; Print the level numbers 00-99 in a grid of 10 by 10 (see level_cell),
+; solved levels in green.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+print_levels:
+    xor a                       ; level number in BCD
+.level:
+    push af
+    call level_cell
+    call @Screen.char_address
+    pop af
+    push af
+    call @Screen.print_digits_2
+    pop af
+    push af
+    call normal_attr
+    ld h,a
+    pop af
+    push af
+    call paint_level
+    pop af
+    add a,1                     ; next level, in BCD
+    daa
+    ASSERT @Level.COUNT == 100
+    jr nc,.level                ; until 99 wraps to 00
+    ret
+
+; Print the number of solved levels (Level.solved_bcd) in row 23:
+; "Solved: 000".
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+print_solved:
+    ld bc,23 << 8 | 10          ; row 23, column 10
+    call @Screen.char_address
+    ld hl,solved_text           ; "Solved:"
+    ld b,SOLVED_TEXT_LEN
+    call @Screen.print_string
+    inc e                       ; skip a space
+    ld hl,(@Level.solved_bcd)
+    jp @Screen.print_digits_3
+
 ; Show the current level (Level.number_bcd) as selected, if it isn't
 ; already: give the previously selected one back its normal colour, give
 ; the current one Color.SELECTED_ATTR, and print its number and best
@@ -112,52 +160,25 @@ update:
     ret z                       ; unchanged
     jp @Level.select
 
-; Print "Select level" in row 1.
-; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
-print_select_level:
-    ld bc,1 << 8 | 10           ; row 1, column 10
-    call @Screen.char_address
-    ld hl,select_level_text
-    ld b,SELECT_LEVEL_TEXT_LEN
-    jp @Screen.print_string
-
-; Print the number of solved levels (Level.solved_bcd) in row 23:
-; "Solved: 000".
-; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
-print_solved:
-    ld bc,23 << 8 | 10          ; row 23, column 10
-    call @Screen.char_address
-    ld hl,solved_text           ; "Solved:"
-    ld b,SOLVED_TEXT_LEN
-    call @Screen.print_string
-    inc e                       ; skip a space
-    ld hl,(@Level.solved_bcd)
-    jp @Screen.print_digits_3
-
-; Print the level numbers 00-99 in a grid of 10 by 10 (see level_cell),
-; solved levels in green.
-; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
-print_levels:
-    xor a                       ; level number in BCD
-.level:
-    push af
-    call level_cell
-    call @Screen.char_address
-    pop af
-    push af
-    call @Screen.print_digits_2
-    pop af
-    push af
-    call normal_attr
-    ld h,a
-    pop af
-    push af
-    call paint_level
-    pop af
-    add a,1                     ; next level, in BCD
-    daa
-    ASSERT @Level.COUNT == 100
-    jr nc,.level                ; until 99 wraps to 00
+; Character cell of a level's number in the grid: level tens:units is at
+; row 3 + 2 * tens, column 1 + 3 * units.
+; Entry: A = level number in BCD (0x00-0x99).
+; Exit: B = row, C = column of the first digit.  Clobbers: A.
+level_cell:
+    ld c,a                      ; B = 3 + 2 * tens
+    and 0xF0                    ; tens * 16
+    rrca
+    rrca
+    rrca                        ; tens * 2
+    add a,3
+    ld b,a
+    ld a,c                      ; C = 1 + 3 * units
+    and 0x0F
+    ld c,a
+    add a,a
+    add a,c
+    inc a
+    ld c,a
     ret
 
 ; The attribute of a level's number when it isn't selected:
@@ -181,27 +202,6 @@ paint_level:
     ld (de),a
     inc e
     ld (de),a
-    ret
-
-; Character cell of a level's number in the grid: level tens:units is at
-; row 3 + 2 * tens, column 1 + 3 * units.
-; Entry: A = level number in BCD (0x00-0x99).
-; Exit: B = row, C = column of the first digit.  Clobbers: A.
-level_cell:
-    ld c,a                      ; B = 3 + 2 * tens
-    and 0xF0                    ; tens * 16
-    rrca
-    rrca
-    rrca                        ; tens * 2
-    add a,3
-    ld b,a
-    ld a,c                      ; C = 1 + 3 * units
-    and 0x0F
-    ld c,a
-    add a,a
-    add a,c
-    inc a
-    ld c,a
     ret
 
 select_level_text:

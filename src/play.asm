@@ -30,32 +30,6 @@ event_loop:
     PROFILE_BORDER @Color.BLACK    ; idle until the next frame
     jr event_loop
 
-; Show the level's pushes and time (Alloc.pushes, Alloc.time) in the
-; header, each only if it has changed since it was last shown.
-; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
-draw:
-    ; show pushes
-    ld hl,(@Alloc.pushes)
-    ld de,(shown_pushes)
-    or a
-    sbc hl,de
-    jr z,.pushes_done
-    add hl,de                   ; HL = pushes again
-    ld (shown_pushes),hl
-    ld de,@Alloc.screen_bitmap + @Header.PUSHES_COLUMN  ; row 0
-    call @Screen.print_digits_4
-.pushes_done:
-    ; show time
-    ld hl,(@Alloc.time)
-    ld de,(shown_time)
-    or a
-    sbc hl,de
-    ret z
-    add hl,de                   ; HL = time again
-    ld (shown_time),hl
-    ld de,@Alloc.screen_bitmap + @Header.TIME_COLUMN
-    jp @Screen.print_time
-
 ; Set up the top two lines: the header (row 0) with the level number, and
 ; the "Best" line (row 1). The pushes and time in the header are left to
 ; draw.
@@ -89,6 +63,32 @@ BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
     ld de,BEST_LINE + @Header.TIME_COLUMN + 2
     ld a,':'
     jp @Screen.print_char
+
+; Show the level's pushes and time (Alloc.pushes, Alloc.time) in the
+; header, each only if it has changed since it was last shown.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+draw:
+    ; show pushes
+    ld hl,(@Alloc.pushes)
+    ld de,(shown_pushes)
+    or a
+    sbc hl,de
+    jr z,.pushes_done
+    add hl,de                   ; HL = pushes again
+    ld (shown_pushes),hl
+    ld de,@Alloc.screen_bitmap + @Header.PUSHES_COLUMN  ; row 0
+    call @Screen.print_digits_4
+.pushes_done:
+    ; show time
+    ld hl,(@Alloc.time)
+    ld de,(shown_time)
+    or a
+    sbc hl,de
+    ret z
+    add hl,de                   ; HL = time again
+    ld (shown_time),hl
+    ld de,@Alloc.screen_bitmap + @Header.TIME_COLUMN
+    jp @Screen.print_time
 
 best_text:
     DB "Best"
