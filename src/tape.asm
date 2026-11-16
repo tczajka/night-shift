@@ -2,7 +2,7 @@
 ;
 ; The loader is a single line:
 ;
-;   10 BORDER VAL "0": PAPER VAL "0": INK VAL "7": CLEAR VAL "32767":
+;   10 BORDER VAL "0": PAPER VAL "0": INK VAL "7": CLEAR VAL "<code - 1>":
 ;      POKE VAL "23739",VAL "111": LOAD "" SCREEN$ : LOAD "" CODE :
 ;      RANDOMIZE USR VAL "<start>"
 ;
@@ -16,11 +16,9 @@
 ;   appear.
 ;
 ; Numbers are written as VAL "..." so they are stored only as text (no
-; hidden 5-byte binary form). The USR address is generated from `start`,
-; which moves with the size of the level data in front of it. The others
-; are fixed: the ASSERT keeps them in step with the code.
-
-    ASSERT init == 32768        ; LOAD "" CODE loads here; CLEAR just below
+; hidden 5-byte binary form). The addresses are generated: CLEAR just
+; below `code`, where LOAD "" CODE loads the code, and USR at `Start.start`,
+; which moves with the size of the level data in front of it.
 
     MODULE Tape
 
@@ -38,6 +36,18 @@ T_RANDOMIZE EQU 0xF9
 T_CLEAR     EQU 0xFD
 T_ENTER     EQU 0x0D
 
+; A number as 5 decimal digits in quotes, the text after VAL.
+    MACRO DECIMAL_5 value
+    ASSERT (value) >= 10000 && (value) <= 65535
+    DB '"'
+    DB '0' + (value) / 10000 % 10
+    DB '0' + (value) / 1000 % 10
+    DB '0' + (value) / 100 % 10
+    DB '0' + (value) / 10 % 10
+    DB '0' + (value) % 10
+    DB '"'
+    ENDM
+
 ; The BASIC bytes only need to exist in sjasmplus's memory image so SAVETAP
 ; can write them. They are placed at PROG, where BASIC programs normally
 ; live, which is outside the saved blocks.
@@ -50,19 +60,18 @@ basic:
     DB T_BORDER, T_VAL, '"0"', ':'
     DB T_PAPER, T_VAL, '"0"', ':'
     DB T_INK, T_VAL, '"7"', ':'
-    DB T_CLEAR, T_VAL, '"32767"', ':'
+    DB T_CLEAR, T_VAL
+    DECIMAL_5 @code - 1
+    DB ':'
     DB T_POKE, T_VAL, '"23739"', ',', T_VAL, '"111"', ':'
     DB T_LOAD, '""', T_SCREEN, ':'
     DB T_LOAD, '""', T_CODE, ':'
-    DB T_RANDOMIZE, T_USR, T_VAL, '"'
-    ASSERT @start >= 10000 && @start <= 65535   ; 5 digits
-    DB '0' + @start / 10000 % 10, '0' + @start / 1000 % 10
-    DB '0' + @start / 100 % 10, '0' + @start / 10 % 10, '0' + @start % 10
-    DB '"'
+    DB T_RANDOMIZE, T_USR, T_VAL
+    DECIMAL_5 @Start.start
     DB T_ENTER
 .line_end:
 basic_end:
-    ASSERT basic_end <= @init
+    ASSERT basic_end <= @code
 
 ; Loading screen: bitmap and attributes, loaded straight into screen memory
 ; by LOAD "" SCREEN$.
@@ -75,6 +84,6 @@ screen_end:
     EMPTYTAP "nightshift.tap"
     SAVETAP "nightshift.tap", BASIC, "NightShift", basic, basic_end - basic, 10
     SAVETAP "nightshift.tap", CODE, "Screen", screen, screen_end - screen
-    SAVETAP "nightshift.tap", CODE, "NightShift", @init, @init_end - @init
+    SAVETAP "nightshift.tap", CODE, "NightShift", @code, @code_end - @code
 
     ENDMODULE

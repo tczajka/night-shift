@@ -3,17 +3,17 @@
 
     DEVICE ZXSPECTRUM48
 
-; Two sections: initialized bytes (init..init_end: all game code and data,
+; Two sections: initialized bytes (code..code_end: all game code and data,
 ; saved to tape as one CODE block) and uninitialized ones (from uninit: RAM
-; set up at run time, see Alloc). init and uninit are where they begin;
-; init_cur and uninit_cur are where the next bytes go. Switch between them
+; set up at run time, see Alloc). code and uninit are where they begin;
+; code_cur and uninit_cur are where the next bytes go. Switch between them
 ; with ORG, saving the current position (DEFL) first.
-init        EQU 0x8000          ; above contended memory
+code        EQU 0x8000          ; above contended memory
 uninit      EQU 0xA300
-init_cur    DEFL init
+code_cur    DEFL code
 uninit_cur  DEFL uninit
 
-    ORG init_cur
+    ORG code_cur
 
     INCLUDE "profile.asm"       ; macros only, no code
 
@@ -25,15 +25,7 @@ levels:
     INCBIN "../build/levels.bin"
 levels_end:
 
-; Entry point, called by the BASIC loader (see tape.asm).
-start:
-    di                          ; no ROM interrupt handler while initializing
-    ld sp,Alloc.stack_end       ; leave the BASIC stack; no return to BASIC
-    call Interrupt.init
-    call Level.init
-    ei                          ; initialized: start our frame interrupt
-    jp Splash.start
-
+    INCLUDE "start.asm"         ; entry point
     INCLUDE "memory.asm"
     INCLUDE "math.asm"
     INCLUDE "interrupt.asm"
@@ -46,7 +38,7 @@ start:
     INCLUDE "splash.asm"
     INCLUDE "level_select.asm"
     INCLUDE "play.asm"
-init_end:
-    ASSERT init_end <= uninit
+code_end:
+    ASSERT code_end <= uninit
     INCLUDE "alloc.asm"
     INCLUDE "tape.asm"

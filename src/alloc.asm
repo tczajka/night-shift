@@ -4,7 +4,7 @@
 ;   4000-57FF  screen bitmap (Screen.bitmap)
 ;   5800-5AFF  screen attributes (Screen.attrs)
 ;   5B00-7FFF  BASIC
-;   8000-....  code and data (init..init_end), loaded from tape
+;   8000-....  code and data (code..code_end), loaded from tape
 ;   A000-A18F  high scores
 ;   A200-A2B6  current level
 ;   A300-....  uninitialized variables (uninit, see main.asm)
@@ -19,10 +19,10 @@
 
     MODULE Alloc
 
-    ; init..init_end (see main.asm)
+    ; code..code_end (see main.asm)
 
     ORG 0xA000
-    ASSERT @init_end <= $
+    ASSERT @code_end <= $
 
 ; High scores: for each level, best pushes then best time, each
 ; a little-endian word of 4 BCD digits (time is 0xMMSS, minutes:seconds).
@@ -55,8 +55,8 @@ level_end:
     ORG 0xE000
     ASSERT @uninit_cur <= $
 
-; Stack: SP starts at stack_end (set by `start`) and grows down towards
-; stack. Uncontended memory, so pushes and calls run at full speed.
+; Stack: SP starts at stack_end (set by `Start.start`) and grows down
+; towards stack. Uncontended memory, so pushes and calls run at full speed.
 stack:
     DS 0x1000                   ; 4KB
 stack_end:

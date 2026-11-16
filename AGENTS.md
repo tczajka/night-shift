@@ -29,10 +29,10 @@ in Z80 assembly. See `README.md` for the player-facing description.
 - `src/main.asm` is the only file passed to sjasmplus; everything else is
   `INCLUDE`d. Wrap each included file in `MODULE <Name>`; use `.local` labels
   inside routines.
-- All game code and data go between `init` and `init_end` in
+- All game code and data go between `code` and `code_end` in
   `main.asm`: only that range is saved to tape.
 - Includes: `profile.asm` (macros) first, then the level data (it must
-  start at `init`), then the code, including `color.asm` (constants
+  start at `code`), then the code, including `color.asm` (constants
   only), then `alloc.asm` and `tape.asm` last.
 - Refer to labels in other modules with `@` (e.g. `@Alloc.stack_end`).
   It is required inside a `MODULE`: there a plain reference to a label
@@ -52,10 +52,8 @@ in Z80 assembly. See `README.md` for the player-facing description.
   variables don't update; IY is free.
 - The tape loader disables ROM printing to the main screen (channel S), so
   the game must draw to the screen directly.
-- The BASIC loader's addresses are text. The `USR` address is generated
-  from `start`, which follows the level data at `0x8000`; the others are
-  fixed, and `tape.asm` asserts they match the code, so moving `ORG` means
-  editing the loader too.
+- The BASIC loader's addresses are text, generated from the code: `CLEAR`
+  from `code`, `USR` from `Start.start` (which follows the level data).
 
 ## Screen design
 
