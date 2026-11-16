@@ -51,6 +51,12 @@ its [releases](https://github.com/chernandezba/zesarux/releases) into
 `make run ZESARUX_DIR=/path/to/ZEsarUX-13.0`.
 On real hardware, load the tape with `LOAD ""`.
 
+## Credits
+
+The levels are from Microban, a set of Sokoban puzzles by David W. Skinner
+([source](http://www.abelmartin.com/rj/sokobanJS/Skinner/David%20W.%20Skinner%20-%20Sokoban.htm)).
+
 ## License
 
-[MIT](LICENSE)
+The code is [MIT](LICENSE). The levels (`levels/`) are David W. Skinner's,
+under his terms above.
