@@ -10,24 +10,9 @@ start:
 
     call @Header.print_labels   ; row 0: "Level", "Pushes", "Time", ':'
 
-    ; "Select level"
-    ld bc,1 << 8 | 10           ; row 1, column 10
-    call @Screen.char_address
-    ld hl,select_level_text
-    ld b,SELECT_LEVEL_TEXT_LEN
-    call @Screen.print_string
-
+    call print_select_level     ; row 1: "Select level"
     call print_levels           ; rows 3-21: "00" ... "99"
-
-    ; "Solved: 000"
-    ld bc,23 << 8 | 10          ; row 23, column 10
-    call @Screen.char_address
-    ld hl,solved_text           ; "Solved:"
-    ld b,SOLVED_TEXT_LEN
-    call @Screen.print_string
-    inc e                       ; skip a space
-    ld hl,(@Level.solved_bcd)   ; number of solved levels
-    call @Screen.print_digits_3
+    call print_solved           ; row 23: "Solved: 000"
 
     ld a,NONE                   ; no level shown as selected yet
     ld (shown_bcd),a
@@ -126,6 +111,28 @@ update:
     cp c
     ret z                       ; unchanged
     jp @Level.select
+
+; Print "Select level" in row 1.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+print_select_level:
+    ld bc,1 << 8 | 10           ; row 1, column 10
+    call @Screen.char_address
+    ld hl,select_level_text
+    ld b,SELECT_LEVEL_TEXT_LEN
+    jp @Screen.print_string
+
+; Print the number of solved levels (Level.solved_bcd) in row 23:
+; "Solved: 000".
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+print_solved:
+    ld bc,23 << 8 | 10          ; row 23, column 10
+    call @Screen.char_address
+    ld hl,solved_text           ; "Solved:"
+    ld b,SOLVED_TEXT_LEN
+    call @Screen.print_string
+    inc e                       ; skip a space
+    ld hl,(@Level.solved_bcd)
+    jp @Screen.print_digits_3
 
 ; Print the level numbers 00-99 in a grid of 10 by 10 (see level_cell),
 ; solved levels in green.
