@@ -94,6 +94,12 @@ time_tick:
     ld (time),hl
     ret
 
+; The levels, built by tools/levels.py (design/level-format.md): an index
+; of 100 offsets from `levels`, then the levels.
+levels:
+    INCBIN "../build/levels.bin"
+levels_end:
+
 solved_bcd: DW 0                ; number of solved levels in BCD (0x0000-0x0100)
 
 ; The current level.

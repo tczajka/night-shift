@@ -7,6 +7,12 @@ BUILD   := build
 TAP     := $(BUILD)/nightshift.tap
 SOURCES := $(wildcard src/*.asm)
 IMAGES  := images/load.scr
+PYTHON  := python3
+
+# Level data (design/level-format.md), built from the Sokoban text files by
+# tools/levels.py. Its report of every level goes to levels.txt.
+LEVEL_SOURCES := levels/Microban.sok
+LEVELS  := $(BUILD)/levels.bin
 
 # Stricter parsing, warnings as errors, whole-word-only DEFINE substitution
 # (see sjasmplus --help=syntax), and all optional warnings.
@@ -28,10 +34,13 @@ FLAGS_FILE := $(BUILD)/asmflags
 
 all: $(TAP)
 
-$(TAP): $(SOURCES) $(IMAGES) $(FLAGS_FILE) | $(BUILD)
+$(TAP): $(SOURCES) $(IMAGES) $(LEVELS) $(FLAGS_FILE) | $(BUILD)
 	$(ASM) $(ASMFLAGS) --nologo --msg=war --outprefix=$(BUILD)/ \
 		--sym=$(BUILD)/nightshift.sym --lst=$(BUILD)/nightshift.lst \
 		src/main.asm
+
+$(LEVELS): tools/levels.py $(LEVEL_SOURCES) | $(BUILD)
+	$(PYTHON) tools/levels.py $@ $(LEVEL_SOURCES) > $(BUILD)/levels.txt
 
 $(FLAGS_FILE): FORCE | $(BUILD)
 	@echo '$(ASMFLAGS)' | cmp -s - $@ || echo '$(ASMFLAGS)' > $@

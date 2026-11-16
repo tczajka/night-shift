@@ -5,7 +5,7 @@
 ;   5800-5AFF  screen attributes
 ;   5B00-7FFF  BASIC
 ;   8000-....  code (code_start..code_end), loaded from tape
-;   9000-918F  high scores
+;   A000-A18F  high scores
 ;   E000-EFFF  stack (4KB)
 ;   FDFD-FDFF  interrupt entry
 ;   FE00-FF00  interrupt table
@@ -29,7 +29,7 @@ screen_attrs_end:
     ASSERT $ <= @code_start
     ; code_start..code_end (see main.asm)
 
-    ORG 0x9000
+    ORG 0xA000
     ASSERT @code_end <= $
 
 ; High scores: for each level, best pushes then best time, each

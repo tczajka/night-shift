@@ -31,7 +31,8 @@ supported.
 
 ## Building
 
-Requires [sjasmplus](https://github.com/z00m128/sjasmplus) and GNU Make.
+Requires [sjasmplus](https://github.com/z00m128/sjasmplus), GNU Make and
+Python 3 (standard library only).
 
 ```
 make          # builds build/nightshift.tap
