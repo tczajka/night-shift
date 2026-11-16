@@ -33,6 +33,17 @@ column 0–15.
 The script centres each level on the board, so positions are on the
 board, and the game does no positioning.
 
+## Layout of the level data
+
+| Bytes | Contents |
+| --- | --- |
+| 200 | index: 100 little-endian words, the offset of each level (00 first) from the start of the level data |
+| ... | the levels, one after another |
+
+The offsets are from the start of the data rather than addresses, so the
+script doesn't need to know where the data will be loaded: the game adds
+the address of the data. Level k's offset is at offset 2k.
+
 ## Layout of a level
 
 n is the number of crates, which equals the number of targets.
@@ -45,10 +56,5 @@ n is the number of crates, which equals the number of targets.
 | n | target positions |
 | n | crate positions |
 
-A level takes 24 + 2n bytes: 32–44 bytes for 4–10 crates, about 4 KB for
-all 100.
-
-## Finding a level
-
-Levels are stored one after another, 00 first, with no index. To find
-level k, skip k levels, each 24 + 2n bytes long.
+A level takes 24 + 2n bytes: 32–44 bytes for 4–10 crates. All 100 take
+about 4 KB, plus 200 bytes for the index.
