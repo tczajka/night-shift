@@ -18,6 +18,9 @@ BRIGHT      EQU 0x40
 TEXT_ATTR     EQU WHITE | BLACK << 3 | BRIGHT   ; text, and the screen behind it
 SOLVED_ATTR   EQU GREEN | BLACK << 3 | BRIGHT   ; a solved level on level select
 SELECTED_ATTR EQU MAGENTA | BLACK << 3 | BRIGHT ; the selected level on level select
-WALL_ATTR     EQU WHITE | RED << 3              ; walls: white on dark red
+WALL_ATTR     EQU WHITE | RED << 3              ; walls: white on red
+FLOOR_ATTR    EQU YELLOW | BLUE << 3 | BRIGHT   ; floor: bulldozer and crates
+TARGET_ATTR   EQU GREEN | BLUE << 3 | BRIGHT    ; floor with a target
+OUTSIDE_ATTR  EQU BLACK | BLACK << 3            ; outside the walls: black
 
     ENDMODULE

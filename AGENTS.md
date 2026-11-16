@@ -80,17 +80,18 @@ The player is a bulldozer pushing crates. Every move (walking or pushing)
 slides smoothly to the next tile, so sprites are often not aligned to the
 8×8 attribute grid. The colour scheme avoids clash:
 
-- Board paper is black everywhere except walls; everything else is ink.
+- Board paper is bright blue inside the walls and black outside; walls
+  are dark red and white (not bright). Everything that moves is ink.
 - Bulldozer and crates are bright yellow, the floor cells' ink colour.
-  Targets are bright green, walls red and white. Board attributes depend
-  only on the cell (floor, target, wall) and never change during play.
+  Targets are bright green. Board attributes depend only on the cell
+  (floor, target, wall, outside) and never change during play.
 - Targets are an ink pattern, inset from the tile edges so the blade never
   touches it. Anything sliding onto a target turns green cell by cell; a
   crate on a target is shown by colour alone.
 - Green also marks solved levels and the solved-level header; the selected
   level uses a colour that is neither green nor yellow.
-- The crate fills its tile (ink, with black frame and plank lines, so
-  adjacent crates show a seam). The bulldozer has 4 rotations and faces its
+- The crate fills its tile (ink, with paper-coloured frame and plank
+  lines, so adjacent crates show a seam). The bulldozer has 4 rotations and faces its
   last move; its blade reaches the front tile edge so it stays in contact
   with the crate during a push.
 - Bulldozer and crate are drawn as opaque 16×16 blocks by one routine; no

@@ -11,8 +11,12 @@ HEIGHT      EQU 11
 
 ; Bits of a board square.
 WALL        EQU 0x01
-TARGET      EQU 0x02
-CRATE       EQU 0x04
+FLOOR       EQU 0x02            ; inside the walls (reachable from the start)
+TARGET      EQU 0x04
+CRATE       EQU 0x08
+
+NO_SQUARE   EQU 0xFF            ; not a position
+    ASSERT WIDTH * HEIGHT <= NO_SQUARE
 
 ; Mark every level as not solved yet: set all high scores to NO_SCORE.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
@@ -72,8 +76,8 @@ high_score_address:
     ret
 
 ; Load the current level (`number`) from the level data (`levels` in
-; main.asm): set up the board and the bulldozer, and set the pushes and
-; time to 0. Call it with the time stopped (`time_running` clear).
+; main.asm): set up the board (see mark_floor) and the bulldozer, and set
+; the pushes and time to 0. Call it with the time stopped (`time_running` clear).
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 load:
     ld a,(number)               ; HL = the level's index entry
@@ -132,12 +136,73 @@ load:
     ld (de),a
     djnz .crate
 
+    call mark_floor
+
     xor a
     ld (@Alloc.time_frames),a
     ld h,a
     ld l,a
     ld (@Alloc.pushes),hl
     ld (@Alloc.time),hl
+    ret
+
+; Mark the floor: set FLOOR on every square the bulldozer could reach if
+; nothing were in the way, i.e. the squares inside the walls. A flood fill
+; from the bulldozer, with the squares still to visit kept on the stack
+; (at most 4 per square: 4 * 176 words).
+; Entry: the walls and the bulldozer set up.  Exit: none.
+; Clobbers: A, DE, HL.
+mark_floor:
+    ld h,@Alloc.board >> 8
+    ld e,NO_SQUARE              ; marks the bottom of the squares to visit
+    push de
+    ld a,(@Alloc.bulldozer)
+    ld l,a
+.visit:                         ; L = position
+    ld a,(hl)
+    and WALL | FLOOR
+    jr nz,.next                 ; a wall, or already marked
+    ld a,(hl)
+    or FLOOR
+    ld (hl),a
+
+    ; Visit the neighbours that are on the board.
+    ASSERT WIDTH == 16
+    ld a,l                      ; left
+    and 0x0F
+    jr z,.left_done
+    ld e,l
+    dec e
+    push de
+.left_done:
+    ld a,l                      ; right
+    and 0x0F
+    cp WIDTH - 1
+    jr z,.right_done
+    ld e,l
+    inc e
+    push de
+.right_done:
+    ld a,l                      ; up
+    sub WIDTH
+    jr c,.up_done
+    ld e,a
+    push de
+.up_done:
+    ld a,l                      ; down
+    add a,WIDTH
+    cp WIDTH * HEIGHT
+    jr nc,.down_done
+    ld e,a
+    push de
+.down_done:
+
+.next:
+    pop de
+    ld l,e
+    ld a,e
+    cp NO_SQUARE
+    jr nz,.visit
     ret
 
 ; If `time_running`, advance the current level's time by 1/50 of a second,

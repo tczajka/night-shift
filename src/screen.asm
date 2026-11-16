@@ -176,6 +176,30 @@ draw_tile:
     djnz .line
     ret
 
+; Clear a 2x2 block of character cells: set all its pixels to 0 (paper).
+; Leaves attributes unchanged.
+; Entry: B = row (0-22), C = column (0-30) of the top left cell.
+; Exit: none.  Clobbers: A, BC, DE.
+clear_tile:
+    push bc
+    call char_address           ; top half
+    call .half
+    pop bc
+    inc b                       ; bottom half
+    call char_address
+    ; fall through
+.half:
+    ld b,8
+    xor a
+.line:
+    ld (de),a
+    inc e
+    ld (de),a
+    dec e
+    inc d                       ; next pixel line of the cells
+    djnz .line
+    ret
+
 ; Set the attributes of a 2x2 block of character cells.
 ; Entry: A = attribute, B = row (0-22), C = column (0-30) of the top left
 ; cell.

@@ -67,30 +67,54 @@ BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
     ld a,':'
     jp @Screen.print_char
 
-; Draw the board (Alloc.board): for now, the walls, each square of wall as
-; Sprite.wall in Color.WALL_ATTR. Other squares are left as they are.
+; Draw the whole board (Alloc.board), every square (see draw_square), so
+; it can redraw the board over anything.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw_board:
     ld hl,@Alloc.board          ; L = position
 .square:
-    ld a,(hl)
-    and @Level.WALL
-    jr z,.next
+    call draw_square
+    inc l
+    ld a,l
+    cp @Level.WIDTH * @Level.HEIGHT
+    jr nz,.square
+    ret
+
+; Draw a square of the board: a wall as Sprite.wall in Color.WALL_ATTR;
+; any other square, for now, empty (no pixels) in its colours:
+; Color.TARGET_ATTR for a target, Color.FLOOR_ATTR for other floor, and
+; Color.OUTSIDE_ATTR outside the walls.
+; Entry: HL = square in Alloc.board.
+; Exit: HL unchanged.  Clobbers: A, BC, DE.
+draw_square:
     push hl
     ld a,l
     call square_cell
+    ld a,(hl)
+    and @Level.WALL
+    jr nz,.wall
+    push bc
+    call @Screen.clear_tile
+    pop bc
+    ld a,(hl)
+    and @Level.FLOOR
+    ld a,@Color.OUTSIDE_ATTR    ; (ld leaves the flags)
+    jr z,.paint
+    ld a,(hl)
+    and @Level.TARGET
+    ld a,@Color.FLOOR_ATTR
+    jr z,.paint
+    ld a,@Color.TARGET_ATTR
+    jr .paint
+.wall:
     push bc
     ld hl,@Sprite.wall
     call @Screen.draw_tile
     pop bc
     ld a,@Color.WALL_ATTR
+.paint:
     call @Screen.paint_tile
     pop hl
-.next:
-    inc l
-    ld a,l
-    cp @Level.WIDTH * @Level.HEIGHT
-    jr nz,.square
     ret
 
 ; Character cell of a board square's top left corner: each square is 2x2
