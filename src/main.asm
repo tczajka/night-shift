@@ -3,8 +3,6 @@
 
     DEVICE ZXSPECTRUM48
 
-    INCLUDE "profile.asm"         ; macros only, no code
-
 ; Two sections: initialized bytes (init..init_end: all game code and data,
 ; saved to tape as one CODE block) and uninitialized ones (from uninit: RAM
 ; set up at run time, see Alloc). init and uninit are where they begin;
@@ -16,6 +14,8 @@ init_cur    DEFL init
 uninit_cur  DEFL uninit
 
     ORG init_cur
+
+    INCLUDE "profile.asm"       ; macros only, no code
 
 ; The levels, built by tools/levels.py (design/level-format.md): an index of
 ; 100 offsets from `levels`, then the levels. First in the code, so they
@@ -38,6 +38,7 @@ start:
     INCLUDE "math.asm"
     INCLUDE "interrupt.asm"
     INCLUDE "input.asm"
+    INCLUDE "color.asm"
     INCLUDE "screen.asm"
     INCLUDE "sprite.asm"
     INCLUDE "header.asm"
@@ -46,9 +47,6 @@ start:
     INCLUDE "level_select.asm"
     INCLUDE "play.asm"
 init_end:
-init_cur DEFL $                 ; the end of the initialized section
-    INCLUDE "color.asm"
+    ASSERT init_end <= uninit
     INCLUDE "alloc.asm"
     INCLUDE "tape.asm"
-
-    ASSERT init_cur <= uninit

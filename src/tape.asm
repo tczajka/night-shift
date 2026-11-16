@@ -62,6 +62,7 @@ basic:
     DB T_ENTER
 .line_end:
 basic_end:
+    ASSERT basic_end <= @init
 
 ; Loading screen: bitmap and attributes, loaded straight into screen memory
 ; by LOAD "" SCREEN$.

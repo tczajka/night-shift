@@ -31,9 +31,9 @@ in Z80 assembly. See `README.md` for the player-facing description.
   inside routines.
 - All game code and data go between `init` and `init_end` in
   `main.asm`: only that range is saved to tape.
-- Includes: macro-only files (`profile.asm`) first, then the code, then
-  the constants-only files (`color.asm`, `alloc.asm`), then `tape.asm`
-  last.
+- Includes: `profile.asm` (macros) first, then the level data (it must
+  start at `init`), then the code, including `color.asm` (constants
+  only), then `alloc.asm` and `tape.asm` last.
 - Refer to labels in other modules with `@` (e.g. `@Alloc.stack_end`).
   It is required inside a `MODULE`: there a plain reference to a label
   defined later is first taken as module-local, which leaves bogus
