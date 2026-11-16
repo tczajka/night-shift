@@ -67,8 +67,8 @@ BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
     ld a,':'
     jp @Screen.print_char
 
-; Draw the whole board (Alloc.board), every square (see draw_square), so
-; it can redraw the board over anything.
+; Draw the whole board (Alloc.board), every square (see draw_square), then
+; the bulldozer on top, so it can redraw the board over anything.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw_board:
     ld hl,@Alloc.board          ; L = position
@@ -78,41 +78,83 @@ draw_board:
     ld a,l
     cp @Level.WIDTH * @Level.HEIGHT
     jr nz,.square
-    ret
+    ; fall through
 
-; Draw a square of the board: a wall as Sprite.wall in Color.WALL_ATTR;
-; any other square, for now, empty (no pixels) in its colours:
-; Color.TARGET_ATTR for a target, Color.FLOOR_ATTR for other floor, and
-; Color.OUTSIDE_ATTR outside the walls.
+; Draw the bulldozer (Alloc.bulldozer), facing Alloc.facing, over its
+; square. Leaves the square's attributes as they are.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+draw_bulldozer:
+    ld a,(@Alloc.bulldozer)
+    call square_cell            ; B, C = cell
+    ld a,(@Alloc.facing)        ; HL = Sprite.bulldozer + facing * 32
+    rrca                        ; * 32 (facing < 8)
+    rrca
+    rrca
+    ld hl,@Sprite.bulldozer
+    add a,l
+    ld l,a
+    adc a,h
+    sub l
+    ld h,a
+    jp @Screen.draw_tile
+
+; Draw a square of the board in its colours, without the bulldozer (see
+; draw_bulldozer):
+; - a wall: Sprite.wall in Color.WALL_ATTR;
+; - floor, in Color.TARGET_ATTR on a target and Color.FLOOR_ATTR otherwise:
+;   a crate, else a target, else nothing;
+; - outside the walls: nothing, in Color.OUTSIDE_ATTR.
 ; Entry: HL = square in Alloc.board.
 ; Exit: HL unchanged.  Clobbers: A, BC, DE.
 draw_square:
     push hl
     ld a,l
-    call square_cell
+    call square_cell            ; B, C = cell
     ld a,(hl)
     and @Level.WALL
     jr nz,.wall
-    push bc
-    call @Screen.clear_tile
-    pop bc
     ld a,(hl)
     and @Level.FLOOR
-    ld a,@Color.OUTSIDE_ATTR    ; (ld leaves the flags)
-    jr z,.paint
+    jr z,.outside
+
+    ld a,(hl)                   ; D = attribute
+    and @Level.TARGET
+    ld d,@Color.FLOOR_ATTR      ; (ld leaves the flags)
+    jr z,.attr_done
+    ld d,@Color.TARGET_ATTR
+.attr_done:
+    ld a,(hl)                   ; HL = sprite
+    and @Level.CRATE
+    jr nz,.crate
     ld a,(hl)
     and @Level.TARGET
-    ld a,@Color.FLOOR_ATTR
-    jr z,.paint
-    ld a,@Color.TARGET_ATTR
+    jr z,.clear
+    ld hl,@Sprite.target
+    jr .draw
+.crate:
+    ld hl,@Sprite.crate
+    jr .draw
+
+.outside:
+    ld d,@Color.OUTSIDE_ATTR
+.clear:
+    push bc
+    push de
+    call @Screen.clear_tile
+    pop de
+    pop bc
     jr .paint
 .wall:
-    push bc
+    ld d,@Color.WALL_ATTR
     ld hl,@Sprite.wall
+.draw:
+    push bc
+    push de
     call @Screen.draw_tile
+    pop de
     pop bc
-    ld a,@Color.WALL_ATTR
 .paint:
+    ld a,d
     call @Screen.paint_tile
     pop hl
     ret

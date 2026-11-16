@@ -6,7 +6,7 @@
 ;   5B00-7FFF  BASIC
 ;   8000-....  code (code_start..code_end), loaded from tape
 ;   A000-A18F  high scores
-;   A200-A2B5  current level
+;   A200-A2B6  current level
 ;   E000-EFFF  stack (4KB)
 ;   FDFD-FDFF  interrupt entry
 ;   FE00-FF00  interrupt table
@@ -54,6 +54,7 @@ board:
 board_end:
     ASSERT board_end - board <= 0x100
 bulldozer:   DS 1               ; position of the bulldozer
+facing:      DS 1               ; direction it faces: Level.UP, RIGHT, DOWN or LEFT
 pushes:      DS 2               ; pushes so far, BCD
 time:        DS 2               ; time so far, BCD 0xMMSS (minutes:seconds)
 time_frames: DS 1               ; frames (1/50 s) since `time` last changed, 0-49

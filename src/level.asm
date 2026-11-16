@@ -16,6 +16,12 @@ TARGET      EQU 0x04
 CRATE       EQU 0x08
 
 NO_SQUARE   EQU 0xFF            ; not a position
+
+; Directions (Alloc.facing).
+UP          EQU 0
+RIGHT       EQU 1
+DOWN        EQU 2
+LEFT        EQU 3
     ASSERT WIDTH * HEIGHT <= NO_SQUARE
 
 ; Mark every level as not solved yet: set all high scores to NO_SCORE.
@@ -76,8 +82,8 @@ high_score_address:
     ret
 
 ; Load the current level (`number`) from the level data (`levels` in
-; main.asm): set up the board (see mark_floor) and the bulldozer, and set
-; the pushes and time to 0. Call it with the time stopped (`time_running` clear).
+; main.asm): set up the board (see mark_floor) and the bulldozer, facing
+; up, and set the pushes and time to 0. Call it with the time stopped (`time_running` clear).
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 load:
     ld a,(number)               ; HL = the level's index entry
@@ -139,6 +145,8 @@ load:
     call mark_floor
 
     xor a
+    ASSERT UP == 0
+    ld (@Alloc.facing),a
     ld (@Alloc.time_frames),a
     ld h,a
     ld l,a
