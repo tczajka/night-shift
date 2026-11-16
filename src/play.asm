@@ -12,7 +12,7 @@ start:
     ld a,@Color.TEXT_ATTR
     call @Screen.clear
 
-    call init_top_lines         ; header and "Best" line
+    call init_status_lines      ; header and "Best" line
     ld hl,NONE                  ; pushes and time not shown yet: draw shows them
     ld (shown_pushes),hl
     ld (shown_time),hl
@@ -30,11 +30,11 @@ event_loop:
     PROFILE_BORDER @Color.BLACK    ; idle until the next frame
     jr event_loop
 
-; Set up the top two lines: the header (row 0) with the level number, and
-; the "Best" line (row 1). The pushes and time in the header are left to
-; draw.
+; Set up the status lines at the top: the header (row 0) with the level
+; number, and the "Best" line (row 1). The pushes and time in the header
+; are left to draw.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
-init_top_lines:
+init_status_lines:
     call @Header.print_labels   ; row 0: "Level", "Pushes", "Time", ':'
 
     ; Show the current level (Level.number_bcd).
