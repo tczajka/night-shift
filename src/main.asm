@@ -5,7 +5,14 @@
 
     INCLUDE "profile.asm"         ; macros only, no code
 
-    ORG 0x8000                  ; above contended memory
+; Where the next initialized and uninitialized bytes go: switch between
+; them with ORG, saving the current position (DEFL) first. Initialized
+; bytes go to the code (code_start..code_end, saved to tape), uninitialized
+; ones to RAM set up at run time (see Alloc).
+init_addr   DEFL 0x8000         ; above contended memory
+uninit_addr DEFL 0xA300
+
+    ORG init_addr
 
 ; Everything between code_start and code_end is saved to tape as one CODE
 ; block. All game code and data must be included inside this range.
