@@ -8,8 +8,8 @@
 ;   A000-....  uninitialized variables (uninit, see main.asm): high scores
 ;              (Levels.high_scores), current level (Level.board, ...)
 ;   E000-EFFF  stack (4KB)
-;   FDFD-FDFF  interrupt entry
-;   FE00-FF00  interrupt table
+;   FDFD-FDFF  interrupt entry (Interrupt.entry)
+;   FE00-FF00  interrupt table (Interrupt.vectors)
 ;   FF58-FFFF  BASIC
 ;
 ; Only the code block is on tape. The areas reserved here are set up at run
@@ -29,20 +29,6 @@
 stack:
     DS 0x1000                   ; 4KB
 stack_end:
-
-    ORG 0xFDFD
-    ASSERT stack_end <= $
-
-; JP to the interrupt handler (3 bytes). Its address must be the same byte
-; twice, because every IM 2 vector in the table reads as that address.
-interrupt_entry:
-    DS 3
-
-; IM 2 vector table: 0x101 bytes, all equal to the low byte of
-; interrupt_entry. Must start on a 0x100-byte boundary.
-interrupt_vectors:
-    ASSERT (interrupt_vectors & 0xFF) == 0
-    DS 0x101
-interrupt_vectors_end:
+    ASSERT stack_end <= @Interrupt.entry
 
     ENDMODULE

@@ -2,35 +2,51 @@
 ;
 ; In IM 2 the Z80 jumps through a vector read from I * 0x100 + (data bus
 ; byte). On the Spectrum the data bus value during the interrupt is not
-; reliable, so the vector table (Alloc.interrupt_vectors) is 0x101 bytes all
-; set to VECTOR_BYTE: every possible vector then reads Alloc.interrupt_entry,
-; where a JP to the handler is placed. Both are built at run time, so they
-; take no space on tape.
+; reliable, so the vector table (`vectors`) is 0x101 bytes all set to
+; VECTOR_BYTE: every possible vector then reads `entry`, where a JP to the
+; handler is placed. Both are built at run time, so they take no space on
+; tape.
 ;
 ; I must not point into 0x4000-0x7FFF: on a 48K that makes the ULA show
 ; "snow" on the screen.
 
     MODULE Interrupt
 
-VECTOR_BYTE EQU @Alloc.interrupt_entry & 0xFF
+@code_save DEFL $
+    ORG 0xFDFD
 
-    ASSERT @Alloc.interrupt_vectors >= 0x8000
-    ASSERT (@Alloc.interrupt_vectors & 0xFF) == 0
-    ASSERT @Alloc.interrupt_entry >> 8 == VECTOR_BYTE
+; JP to the handler (3 bytes). Its address must be the same byte twice,
+; because every IM 2 vector in the table reads as that address.
+entry:
+    DS 3
+
+; IM 2 vector table: 0x101 bytes, all equal to the low byte of `entry`.
+; Must start on a 0x100-byte boundary.
+vectors:
+    DS 0x101
+vectors_end:
+
+    ORG @code_save
+
+VECTOR_BYTE EQU entry & 0xFF
+
+    ASSERT vectors >= 0x8000
+    ASSERT (vectors & 0xFF) == 0
+    ASSERT entry >> 8 == VECTOR_BYTE
 
 ; Install the handler and switch to IM 2. Interrupts must be disabled, and
 ; stay disabled: the caller enables them when ready.
 ; Entry: interrupts disabled.  Exit: none.  Clobbers: A, BC, DE, HL.
 init:
-    ld hl,@Alloc.interrupt_vectors
-    ld bc,@Alloc.interrupt_vectors_end - @Alloc.interrupt_vectors
+    ld hl,vectors
+    ld bc,vectors_end - vectors
     ld a,VECTOR_BYTE
     call @Memory.fill           ; fill all 0x101 bytes
     ld a,0xC3                   ; JP nn
-    ld (@Alloc.interrupt_entry),a
+    ld (entry),a
     ld hl,handler
-    ld (@Alloc.interrupt_entry + 1),hl
-    ld a,@Alloc.interrupt_vectors >> 8
+    ld (entry + 1),hl
+    ld a,vectors >> 8
     ld i,a
     im 2
     ret
