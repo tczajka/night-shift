@@ -57,7 +57,10 @@ BEST_LINE EQU @Alloc.screen_bitmap + BEST_ROW * 32  ; rows 0-7: just + 32
 
 event_loop:
     halt
+    PROFILE_BORDER @Screen.BLUE     ; drawing
     call draw
+    PROFILE_BORDER @Screen.RED      ; processing after the draw (none yet)
+    PROFILE_BORDER @Screen.BLACK    ; idle until the next frame
     jr event_loop
 
 ; Show the level's pushes and time (Level.pushes, Level.time) in the

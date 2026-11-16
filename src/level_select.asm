@@ -39,11 +39,14 @@ start:
 
 event_loop:
     halt
+    PROFILE_BORDER @Screen.BLUE     ; drawing
     call draw
+    PROFILE_BORDER @Screen.RED      ; processing after the draw
     call @Input.get_pressed
     bit @Input.FIRE,a
     jp nz,@Play.start           ; play the current level
     call update
+    PROFILE_BORDER @Screen.BLACK    ; idle until the next frame
     jr event_loop
 
 ; Show the current level (Level.number_bcd) as selected, if it isn't
