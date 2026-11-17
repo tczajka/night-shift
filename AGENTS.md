@@ -68,7 +68,8 @@ visible in them:
 - The game counts pushes (not moves) and time. "Best" is each level's best
   pushes and best time; level select's header shows the selected level's.
 - On level select, solved levels and the selected level each have their own
-  colour.
+  colour. The pause menu's selected item has the selected level's colour;
+  the cursor starts on Resume and doesn't wrap around.
 - When a level is solved, the header line is highlighted; fire returns to
   level select.
 - No undo, by design; Restart is the way out of a dead end.
