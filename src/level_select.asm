@@ -23,10 +23,8 @@ event_loop:
     PROFILE_BORDER @Color.BLUE     ; drawing
     call draw
     PROFILE_BORDER @Color.RED      ; processing after the draw
-    call @Input.get_pressed
-    bit @Input.FIRE,a
-    jp nz,@Play.start           ; play the current level
-    call update
+    jp update                   ; may switch to another screen
+update_return:
     PROFILE_BORDER @Color.BLACK    ; idle until the next frame
     jr event_loop
 
@@ -112,12 +110,20 @@ draw:
     ld hl,(@Level.best_time)
     jp @Screen.print_time
 
-; Move the current level with the direction inputs: in BCD, +1 / -1 for
-; right / left and +0x10 / -0x10 for down / up. Moving off an edge of the
-; grid wraps around to the opposite edge.
-; Entry: A = pressed inputs (see Input.get_pressed).
-; Exit: none.  Clobbers: A, BC, D, HL.
+; Act on the inputs pressed (Input.get_pressed). Jumped to from event_loop,
+; not called, so it can switch to another screen with nothing left on the
+; stack.
+; Fire plays the current level (Play.start). Otherwise, move the current
+; level with the direction inputs: in BCD, +1 / -1 for right / left and
+; +0x10 / -0x10 for down / up. Moving off an edge of the grid wraps around
+; to the opposite edge.
+; Entry: none.
+; Exit: to Play.start, or to update_return.  Clobbers: A, BC, D, HL.
 update:
+    call @Input.get_pressed
+    bit @Input.FIRE,a
+    jp nz,@Play.start           ; play the current level
+
     ld b,a                      ; B = pressed inputs
     ld a,(@Level.number_bcd)
     ld c,a                      ; C = current level, BCD
@@ -157,8 +163,9 @@ update:
 .up_done:
 
     cp c
-    ret z                       ; unchanged
-    jp @Level.select
+    jp z,update_return          ; unchanged
+    call @Level.select
+    jp update_return
 
 ; Character cell of a level's number in the grid: level tens:units is at
 ; row 3 + 2 * tens, column 1 + 3 * units.

@@ -28,9 +28,21 @@ start:
 
     call print_menu
 
-event_loop:                     ; nothing to do yet
+event_loop:
     halt
+    jp update                   ; may switch to another screen
+update_return:
     jr event_loop
+
+; Act on the inputs pressed (Input.get_pressed): nothing yet, but they are
+; taken so they don't wait for a later screen. Jumped to from event_loop,
+; not called, so it can switch to another screen with nothing left on the
+; stack.
+; Entry: none.
+; Exit: to update_return.  Clobbers: A, HL.
+update:
+    call @Input.get_pressed
+    jr update_return
 
 ; Print the menu lines inside the window.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
