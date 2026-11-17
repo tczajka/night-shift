@@ -137,21 +137,20 @@ draw_squares:
     ; fall through
 
 ; Draw the bulldozer (Level.bulldozer), facing Level.facing, over its
-; square. Leaves the square's attributes as they are.
+; square, with its tracks in phase 0 (see Sprite.bulldozer). Leaves the
+; square's attributes as they are.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw_bulldozer:
     ld a,(@Level.bulldozer)
     call square_cell            ; B, C = cell
-    ld a,(@Level.facing)        ; HL = Sprite.bulldozer + facing * 32
-    rrca                        ; * 32 (facing < 8)
-    rrca
-    rrca
-    ld hl,@Sprite.bulldozer
-    add a,l
-    ld l,a
-    adc a,h
-    sub l
+    ASSERT @Sprite.TRACK_PHASES * 0x20 == 0x80
+    ld a,(@Level.facing)        ; HL = Sprite.bulldozer + facing * 0x80
+    ld l,0
+    srl a
+    rr l
     ld h,a
+    ld de,@Sprite.bulldozer
+    add hl,de
     jp @Screen.draw_tile
 
 ; Draw a square of the board in its colours, without the bulldozer (see

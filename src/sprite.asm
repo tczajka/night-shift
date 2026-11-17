@@ -1,10 +1,10 @@
 ; Sprites: 16x16 pixels, 16 rows of 2 bytes, top row first, leftmost pixel
 ; in bit 7 of the first byte. A set bit is ink, a clear bit paper. Each is
-; 32 bytes, and they start on a multiple of 32, so every sprite does.
+; 0x20 bytes, and they start on a multiple of 0x20, so every sprite does.
 
     MODULE Sprite
 
-    ALIGN 32
+    ALIGN 0x20
 begin:
 
 ; Wall: brickwork, in Color.WALL_ATTR: white mortar (ink) between dark red
@@ -28,7 +28,7 @@ wall:
     DG ....#.......#...
     DG ....#.......#...
     DG ....#.......#...
-    ASSERT $ - wall == 32
+    ASSERT $ - wall == 0x20
 
 ; Target: concentric squares, inset 3 pixels from the edges, so the
 ; bulldozer's blade (which reaches the edge of its square) never touches it.
@@ -70,13 +70,20 @@ crate:
     DG .##############.
     DG ................
 
-; Bulldozer, seen from above, facing each direction in the order of the
-; Math directions (RIGHT, LEFT, DOWN, UP): tracks on both sides, the cab
-; in the middle, and the blade at the front, reaching the edge of its square.
+; Bulldozer, seen from above: tracks on both sides, the cab in the middle,
+; and the blade at the front, reaching the edge of its square. For each
+; direction, in the order of the Math directions (RIGHT, LEFT, DOWN, UP),
+; there are TRACK_PHASES versions (phases), each with the tracks 1 pixel
+; further forward than the one before. The tread (2 pixels on, 2 off)
+; repeats every TRACK_PHASES pixels, so the first phase follows the last.
+; LEFT mirrors RIGHT, DOWN is RIGHT transposed, UP is DOWN flipped
+; vertically.
+TRACK_PHASES EQU 4
 bulldozer:
 bulldozer_right:
+    ; phase 0
     DG #############...
-    DG #.#.#.#.#.#.#.##
+    DG #..##..##..##.##
     DG #############.##
     DG ..............##
     DG .###############
@@ -89,11 +96,63 @@ bulldozer_right:
     DG .###############
     DG ..............##
     DG #############.##
-    DG #.#.#.#.#.#.#.##
+    DG #..##..##..##.##
+    DG #############...
+    ; phase 1
+    DG #############...
+    DG ##..##..##..#.##
+    DG #############.##
+    DG ..............##
+    DG .###############
+    DG .###########..##
+    DG .#.#.##...##..##
+    DG .######...##..##
+    DG .######...##..##
+    DG .#.#.##...##..##
+    DG .###########..##
+    DG .###############
+    DG ..............##
+    DG #############.##
+    DG ##..##..##..#.##
+    DG #############...
+    ; phase 2
+    DG #############...
+    DG ###..##..##.#.##
+    DG #############.##
+    DG ..............##
+    DG .###############
+    DG .###########..##
+    DG .#.#.##...##..##
+    DG .######...##..##
+    DG .######...##..##
+    DG .#.#.##...##..##
+    DG .###########..##
+    DG .###############
+    DG ..............##
+    DG #############.##
+    DG ###..##..##.#.##
+    DG #############...
+    ; phase 3
+    DG #############...
+    DG #.##..##..###.##
+    DG #############.##
+    DG ..............##
+    DG .###############
+    DG .###########..##
+    DG .#.#.##...##..##
+    DG .######...##..##
+    DG .######...##..##
+    DG .#.#.##...##..##
+    DG .###########..##
+    DG .###############
+    DG ..............##
+    DG #############.##
+    DG #.##..##..###.##
     DG #############...
 bulldozer_left:
+    ; phase 0
     DG ...#############
-    DG ##.#.#.#.#.#.#.#
+    DG ##.##..##..##..#
     DG ##.#############
     DG ##..............
     DG ###############.
@@ -106,46 +165,202 @@ bulldozer_left:
     DG ###############.
     DG ##..............
     DG ##.#############
-    DG ##.#.#.#.#.#.#.#
+    DG ##.##..##..##..#
+    DG ...#############
+    ; phase 1
+    DG ...#############
+    DG ##.#..##..##..##
+    DG ##.#############
+    DG ##..............
+    DG ###############.
+    DG ##..###########.
+    DG ##..##...##.#.#.
+    DG ##..##...######.
+    DG ##..##...######.
+    DG ##..##...##.#.#.
+    DG ##..###########.
+    DG ###############.
+    DG ##..............
+    DG ##.#############
+    DG ##.#..##..##..##
+    DG ...#############
+    ; phase 2
+    DG ...#############
+    DG ##.#.##..##..###
+    DG ##.#############
+    DG ##..............
+    DG ###############.
+    DG ##..###########.
+    DG ##..##...##.#.#.
+    DG ##..##...######.
+    DG ##..##...######.
+    DG ##..##...##.#.#.
+    DG ##..###########.
+    DG ###############.
+    DG ##..............
+    DG ##.#############
+    DG ##.#.##..##..###
+    DG ...#############
+    ; phase 3
+    DG ...#############
+    DG ##.###..##..##.#
+    DG ##.#############
+    DG ##..............
+    DG ###############.
+    DG ##..###########.
+    DG ##..##...##.#.#.
+    DG ##..##...######.
+    DG ##..##...######.
+    DG ##..##...##.#.#.
+    DG ##..###########.
+    DG ###############.
+    DG ##..............
+    DG ##.#############
+    DG ##.###..##..##.#
     DG ...#############
 bulldozer_down:
+    ; phase 0
+    DG ###..........###
+    DG #.#.########.#.#
+    DG #.#.##.##.##.#.#
+    DG ###.########.###
+    DG ###.##.##.##.###
+    DG #.#.########.#.#
+    DG #.#.########.#.#
+    DG ###.##....##.###
+    DG ###.##....##.###
+    DG #.#.##....##.#.#
+    DG #.#.########.#.#
+    DG ###.########.###
+    DG ###.#......#.###
+    DG ....#......#....
+    DG .##############.
+    DG .##############.
+    ; phase 1
+    DG ###..........###
+    DG ###.########.###
+    DG #.#.##.##.##.#.#
+    DG #.#.########.#.#
+    DG ###.##.##.##.###
+    DG ###.########.###
+    DG #.#.########.#.#
+    DG #.#.##....##.#.#
+    DG ###.##....##.###
+    DG ###.##....##.###
+    DG #.#.########.#.#
+    DG #.#.########.#.#
+    DG ###.#......#.###
+    DG ....#......#....
+    DG .##############.
+    DG .##############.
+    ; phase 2
+    DG ###..........###
+    DG ###.########.###
+    DG ###.##.##.##.###
+    DG #.#.########.#.#
+    DG #.#.##.##.##.#.#
+    DG ###.########.###
+    DG ###.########.###
+    DG #.#.##....##.#.#
+    DG #.#.##....##.#.#
+    DG ###.##....##.###
+    DG ###.########.###
+    DG #.#.########.#.#
+    DG ###.#......#.###
+    DG ....#......#....
+    DG .##############.
+    DG .##############.
+    ; phase 3
     DG ###..........###
     DG #.#.########.#.#
     DG ###.##.##.##.###
-    DG #.#.########.#.#
-    DG ###.##.##.##.###
+    DG ###.########.###
+    DG #.#.##.##.##.#.#
     DG #.#.########.#.#
     DG ###.########.###
-    DG #.#.##....##.#.#
     DG ###.##....##.###
     DG #.#.##....##.#.#
+    DG #.#.##....##.#.#
     DG ###.########.###
-    DG #.#.########.#.#
+    DG ###.########.###
     DG ###.#......#.###
     DG ....#......#....
     DG .##############.
     DG .##############.
 bulldozer_up:
+    ; phase 0
+    DG .##############.
+    DG .##############.
+    DG ....#......#....
+    DG ###.#......#.###
+    DG ###.########.###
+    DG #.#.########.#.#
+    DG #.#.##....##.#.#
+    DG ###.##....##.###
+    DG ###.##....##.###
+    DG #.#.########.#.#
+    DG #.#.########.#.#
+    DG ###.##.##.##.###
+    DG ###.########.###
+    DG #.#.##.##.##.#.#
+    DG #.#.########.#.#
+    DG ###..........###
+    ; phase 1
+    DG .##############.
+    DG .##############.
+    DG ....#......#....
+    DG ###.#......#.###
+    DG #.#.########.#.#
+    DG #.#.########.#.#
+    DG ###.##....##.###
+    DG ###.##....##.###
+    DG #.#.##....##.#.#
+    DG #.#.########.#.#
+    DG ###.########.###
+    DG ###.##.##.##.###
+    DG #.#.########.#.#
+    DG #.#.##.##.##.#.#
+    DG ###.########.###
+    DG ###..........###
+    ; phase 2
     DG .##############.
     DG .##############.
     DG ....#......#....
     DG ###.#......#.###
     DG #.#.########.#.#
     DG ###.########.###
-    DG #.#.##....##.#.#
     DG ###.##....##.###
     DG #.#.##....##.#.#
+    DG #.#.##....##.#.#
     DG ###.########.###
+    DG ###.########.###
+    DG #.#.##.##.##.#.#
     DG #.#.########.#.#
     DG ###.##.##.##.###
+    DG ###.########.###
+    DG ###..........###
+    ; phase 3
+    DG .##############.
+    DG .##############.
+    DG ....#......#....
+    DG ###.#......#.###
+    DG ###.########.###
+    DG ###.########.###
+    DG #.#.##....##.#.#
+    DG #.#.##....##.#.#
+    DG ###.##....##.###
+    DG ###.########.###
     DG #.#.########.#.#
+    DG #.#.##.##.##.#.#
+    DG ###.########.###
     DG ###.##.##.##.###
     DG #.#.########.#.#
     DG ###..........###
-    ASSERT bulldozer_right - bulldozer == @Math.RIGHT * 32
-    ASSERT bulldozer_left - bulldozer == @Math.LEFT * 32
-    ASSERT bulldozer_down - bulldozer == @Math.DOWN * 32
-    ASSERT bulldozer_up - bulldozer == @Math.UP * 32
+    ASSERT bulldozer_right - bulldozer == @Math.RIGHT * TRACK_PHASES * 0x20
+    ASSERT bulldozer_left - bulldozer == @Math.LEFT * TRACK_PHASES * 0x20
+    ASSERT bulldozer_down - bulldozer == @Math.DOWN * TRACK_PHASES * 0x20
+    ASSERT bulldozer_up - bulldozer == @Math.UP * TRACK_PHASES * 0x20
+    ASSERT $ - bulldozer == 4 * TRACK_PHASES * 0x20
 
 end:
 
