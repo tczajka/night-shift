@@ -18,14 +18,14 @@ PAUSE_RIGHT  EQU (@Pause.LEFT + @Pause.WIDTH - 1) / 2
     ASSERT PAUSE_RIGHT < @Level.WIDTH
 
 ; Play the current level (Level.number) from the start: load it and draw
-; the whole screen. Call it with the time stopped (see Level.load).
+; the whole screen: the status lines, then the board, which covers the rest
+; of the screen, so nothing needs clearing first. Call it with the time
+; stopped (see Level.load).
 start:
     PROFILE_BORDER @Color.BLACK    ; not the colour of the screen we came from
     call @Level.load
 
-    ld a,@Color.TEXT_ATTR
-    call @Screen.clear
-
+    ASSERT BOARD_ROW + 2 * @Level.HEIGHT == 24 && 2 * @Level.WIDTH == 32
     call init_status_lines      ; header and "Best" line
     ld hl,NONE                  ; pushes and time not shown yet: draw shows them
     ld (shown_pushes),hl
@@ -58,11 +58,20 @@ update_return:
     PROFILE_BORDER @Color.BLACK    ; idle until the next frame
     jr event_loop
 
-; Set up the status lines at the top: the header (row 0) with the level
-; number, and the "Best" line (row 1). The pushes and time in the header
-; are left to draw.
+; Set up the status lines at the top, rows above the board, cleared in
+; Color.TEXT_ATTR: the header (row 0) with the level number, and the "Best"
+; line (row 1). The pushes and time in the header are left to draw.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 init_status_lines:
+    ASSERT BEST_ROW < BOARD_ROW
+    ld bc,0 << 8 | 0            ; rows 0 to BOARD_ROW - 1, all columns
+    ld de,BOARD_ROW << 8 | 32
+    call @Screen.clear_cells
+    ld a,@Color.TEXT_ATTR
+    ld bc,0 << 8 | 0
+    ld de,BOARD_ROW << 8 | 32
+    call @Screen.paint_cells
+
     call @Header.print_labels   ; row 0: "Level", "Pushes", "Time", ':'
 
     ; Show the current level (Level.number_bcd).
