@@ -8,6 +8,17 @@ BOARD_ROW   EQU 2               ; character row of the board's top
 
 NONE        EQU 0xFFFF          ; no number shown yet (not valid BCD)
 
+; The board squares under the pause menu's window (see Pause), which
+; resume redraws: rows and columns of squares, first and last.
+PAUSE_TOP    EQU (@Pause.TOP - BOARD_ROW) / 2
+PAUSE_BOTTOM EQU (@Pause.TOP + @Pause.HEIGHT - 1 - BOARD_ROW) / 2
+PAUSE_LEFT   EQU @Pause.LEFT / 2
+PAUSE_RIGHT  EQU (@Pause.LEFT + @Pause.WIDTH - 1) / 2
+    ASSERT @Pause.TOP >= BOARD_ROW && PAUSE_BOTTOM < @Level.HEIGHT
+    ASSERT PAUSE_RIGHT < @Level.WIDTH
+
+; Play the current level (Level.number) from the start: load it and draw
+; the whole screen. Call it with the time stopped (see Level.load).
 start:
     PROFILE_BORDER @Color.BLACK    ; not the colour of the screen we came from
     call @Level.load
@@ -20,8 +31,19 @@ start:
     ld (shown_pushes),hl
     ld (shown_time),hl
     call draw_board
+    jr play
 
-    call @Input.reset           ; ignore inputs from before the finished screen
+; Go back to playing the current level as it was left by the pause menu:
+; redraw only the squares under its window.
+resume:
+    PROFILE_BORDER @Color.BLACK    ; not the colour of the screen we came from
+    ld l,PAUSE_TOP * @Level.WIDTH + PAUSE_LEFT
+    ld de,(PAUSE_BOTTOM - PAUSE_TOP + 1) << 8 | (PAUSE_RIGHT - PAUSE_LEFT + 1)
+    call draw_squares
+    ; fall through
+
+play:
+    call @Input.reset           ; ignore inputs from the previous screen
 
     ld a,1                      ; start the time
     ld (@Level.time_running),a
@@ -70,17 +92,39 @@ BEST_LINE EQU @Screen.bitmap + BEST_ROW * 32 ; rows 0-7: just + 32
     ld a,':'
     jp @Screen.print_char
 
-; Draw the whole board (Level.board), every square (see draw_square), then
-; the bulldozer on top, so it can redraw the board over anything.
+; Draw the whole board (Level.board), so it can redraw the board over
+; anything (see draw_squares).
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw_board:
-    ld hl,@Level.board          ; L = position
+    ld l,0                      ; the top left square
+    ld de,@Level.HEIGHT << 8 | @Level.WIDTH
+    ; fall through
+
+; Draw a rectangle of board squares (see draw_square), then the bulldozer
+; on top, wherever it is: if its square isn't in the rectangle, drawing it
+; again changes nothing.
+; Entry: L = position of the top left square, D = height, E = width, in
+; squares (at least 1 each).
+; Exit: none.  Clobbers: A, BC, DE, HL.
+draw_squares:
+    ASSERT low @Level.board == 0
+    ld h,high @Level.board      ; HL = the square in Level.board
+.row:
+    push de                     ; D = rows left, E = width
 .square:
+    push de                     ; E = squares left in the row
     call draw_square
+    pop de
     inc l
-    ld a,l
-    cp @Level.WIDTH * @Level.HEIGHT
+    dec e
     jr nz,.square
+    pop de
+    ld a,l                      ; L = the next row's first square
+    sub e
+    add a,@Level.WIDTH
+    ld l,a
+    dec d
+    jr nz,.row
     ; fall through
 
 ; Draw the bulldozer (Level.bulldozer), facing Level.facing, over its

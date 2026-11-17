@@ -84,16 +84,20 @@ paint_item:
     ld a,h
     jp @Screen.paint_cells
 
-; Act on the inputs pressed (Input.get_pressed): up and down move the
-; cursor, stopping at the first and last items. Jumped to from event_loop,
-; not called, so it can switch to another screen with nothing left on the
-; stack.
+; Act on the inputs pressed (Input.get_pressed): fire goes to the selected
+; item's action (see actions), up and down move the cursor, stopping at
+; the first and last items. Jumped to from event_loop, not called, so it
+; can switch to another screen with nothing left on the stack.
 ; Entry: none.
-; Exit: to update_return.  Clobbers: A, B, HL.
+; Exit: to the selected item's action, or to update_return.
+; Clobbers: A, B, HL.
 update:
     call @Input.get_pressed
     ld b,a                      ; B = pressed inputs
     ld a,(selected)
+
+    bit @Input.FIRE,b
+    jr nz,.fire
 
     bit @Math.UP,b
     jr z,.up_done
@@ -110,6 +114,27 @@ update:
 
     ld (selected),a
     jr update_return
+
+.fire:
+    add a,a                     ; HL = actions + selected * 2
+    ld hl,actions
+    add a,l
+    ld l,a
+    adc a,h
+    sub l
+    ld h,a
+    ld a,(hl)                   ; HL = the action
+    inc hl
+    ld h,(hl)
+    ld l,a
+    jp (hl)
+
+; Where each item goes when fire is pressed, in item order.
+actions:
+    DW @Play.resume             ; RESUME
+    DW @Play.start              ; RESTART: load the level again
+    DW @LevelSelect.start       ; QUIT
+    ASSERT $ - actions == ITEMS * 2
 
 ; Print the menu lines inside the window.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
