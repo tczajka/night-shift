@@ -5,7 +5,8 @@ Guidance for coding agents working in this repository.
 ## Project
 
 Night Shift is a Sokoban-style puzzle game for the ZX Spectrum 48K, written
-in Z80 assembly. See `README.md` for the player-facing description.
+in Z80 assembly. See `README.md` for the player-facing description. It has
+no sound and uses no 128K features (AY sound, extra memory).
 
 ## Toolchain and build
 
@@ -77,8 +78,9 @@ visible in them:
 ## Board graphics and animation
 
 The player is a bulldozer pushing crates. Every move (walking or pushing)
-slides smoothly to the next tile, so sprites are often not aligned to the
-8×8 attribute grid. The colour scheme avoids clash:
+slides smoothly to the next tile, 1 pixel per frame (16 frames per move),
+so sprites are often not aligned to the 8×8 attribute grid. The colour
+scheme avoids clash:
 
 - Board paper is bright blue inside the walls and black outside; walls
   are dark red and white (not bright). Everything that moves is ink.
@@ -93,7 +95,8 @@ slides smoothly to the next tile, so sprites are often not aligned to the
 - The crate fills its tile (ink, with a paper-coloured frame and X brace,
   and a paper margin so adjacent crates show a seam). The bulldozer has 4
   rotations and faces its last move; its blade reaches the front tile edge
-  so it stays in contact with the crate during a push.
+  so it stays in contact with the crate during a push. While it moves, its
+  tracks advance 1 pixel per frame through 4 phases.
 - Bulldozer and crate are drawn as opaque 16×16 blocks by one routine; no
   mask data. Horizontally shifted sprites merge their partial edge bytes
   with an edge mask derived from the shift.
@@ -111,10 +114,3 @@ slides smoothly to the next tile, so sprites are often not aligned to the
   leaves the solved-level screen.
 - To test the Kempston path, ZEsarUX can emulate a Kempston joystick
   (`--joystickemulated Kempston`).
-
-## Open decisions
-
-Record each choice here, and in `README.md` where it affects players:
-
-- Animation speed: 2 pixels per frame (8 frames per tile) or 1 (16 frames)
-- Whether to support 128K features (AY sound, extra memory)

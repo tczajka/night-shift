@@ -13,6 +13,7 @@ Early development. There is nothing to build or play yet.
 ## Target platform
 
 - ZX Spectrum 48K (compatibility with 128K / +2 / +3 to be confirmed)
+- No sound
 - Distributed as a `.tap` file that runs in emulators and on real hardware
 
 ## Controls
