@@ -209,15 +209,17 @@ draw:
 
 ; Act on the inputs. Jumped to from event_loop, not called, so it can
 ; switch to another screen with nothing left on the stack.
-; Pressing fire (Input.get_pressed) pauses (Pause.start); the inputs held
-; (Input.held) do nothing yet.
+; Pressing fire (Input.get_pressed) stops the time and pauses
+; (Pause.start); the inputs held (Input.held) do nothing yet.
 ; Entry: none.
 ; Exit: to Pause.start, or to update_return.  Clobbers: A, HL.
 update:
     call @Input.get_pressed
     bit @Input.FIRE,a
-    jp nz,@Pause.start          ; pause
-    jp update_return
+    jp z,update_return
+    xor a                       ; stop the time while paused
+    ld (@Level.time_running),a
+    jp @Pause.start
 
 best_text:
     DB "Best"
