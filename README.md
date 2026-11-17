@@ -60,4 +60,7 @@ The levels are from Microban, a set of Sokoban puzzles by David W. Skinner
 ## License
 
 The code is [MIT](LICENSE). The levels (`levels/`) are David W. Skinner's,
-under his terms above.
+under his terms from the source page:
+
+> My sets are in two groups: Sasquatch and Microban. These sets may be
+> freely distributed provided they remain properly credited.
