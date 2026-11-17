@@ -9,7 +9,7 @@
 ; stack. Uncontended memory, so pushes and calls run at full speed.
     ALIGN 0x100
 stack:
-    DS 0x2000
+    DS 0x1000
 stack_end:
 
 @uninit_save DEFL $
