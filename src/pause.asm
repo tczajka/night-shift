@@ -21,6 +21,7 @@ TEXT_COLUMN EQU LEFT + 2        ; the menu lines' text
     ASSERT TOP + HEIGHT <= 24 && LEFT + WIDTH <= 32
 
 start:
+    PROFILE_BORDER @Color.BLACK    ; not the colour of the screen we came from
     ; The window: clear it, give it the border's colour, then the text's
     ; inside the border.
     ld bc,TOP << 8 | LEFT

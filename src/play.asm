@@ -9,6 +9,7 @@ BOARD_ROW   EQU 2               ; character row of the board's top
 NONE        EQU 0xFFFF          ; no number shown yet (not valid BCD)
 
 start:
+    PROFILE_BORDER @Color.BLACK    ; not the colour of the screen we came from
     call @Level.load
 
     ld a,@Color.TEXT_ATTR

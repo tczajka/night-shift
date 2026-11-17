@@ -4,6 +4,7 @@
     MODULE Splash
 
 start:
+    PROFILE_BORDER @Color.BLACK    ; not the colour of the screen we came from
     call @Input.reset           ; ignore inputs held from before the splash
 .wait:
     halt

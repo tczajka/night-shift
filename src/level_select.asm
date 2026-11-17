@@ -5,6 +5,7 @@
 NONE        EQU 0xFF            ; no level (not valid BCD)
 
 start:
+    PROFILE_BORDER @Color.BLACK    ; not the colour of the screen we came from
     ld a,@Color.TEXT_ATTR
     call @Screen.clear
 
