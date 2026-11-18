@@ -21,17 +21,7 @@ init:
     ld bc,high_scores_end - high_scores
     ASSERT NO_SCORE == 0xFFFF   ; both bytes the same
     ld a,NO_SCORE & 0xFF
-    call @Memory.fill
-
-    ; TEMPORARY: level 13 solved in 2718 pushes, 31:41.
-.TEST_SCORE EQU high_scores + 13 * 4
-    ld hl,0x2718
-    ld (.TEST_SCORE),hl         ; pushes
-    ld hl,0x3141
-    ld (.TEST_SCORE + 2),hl     ; time
-    ld hl,0x0001
-    ld (solved_bcd),hl
-    ret
+    jp @Memory.fill
 
 ; Address of a level's data (design/level-format.md).
 ; Entry: A = level number in binary (0-99).
