@@ -6,9 +6,7 @@ Push crates onto their target spots to clear each level. You can push a
 crate but never pull it, and you can only push one crate at a time, so a
 careless move can leave a level unsolvable.
 
-## Status
-
-Early development. There is nothing to build or play yet.
+**[Play it in your browser](https://tczajka.github.io/night-shift/)**
 
 ## Target platform
 
