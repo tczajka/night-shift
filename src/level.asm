@@ -123,7 +123,7 @@ mark_floor:
     add a,l
     ld e,a
     push de
-    inc bc
+    inc c                       ; offsets is within a page
     ld a,c
     cp offsets_end & 0xFF
     jr nz,.neighbour
@@ -211,11 +211,8 @@ end_move:
 step:
     ld a,(facing)
     ld hl,offsets
-    add a,l
+    add a,l                     ; no carry: offsets is aligned
     ld l,a
-    adc a,h
-    sub l
-    ld h,a
     ld a,(hl)
     ret
 
@@ -252,7 +249,8 @@ time_tick:
     ret
 
 ; Position offset of a step in each direction, indexed by the Math
-; directions.
+; directions. Aligned, so the 4 bytes are within a page.
+    ALIGN 4
 offsets:
     DB 1, -1, WIDTH, -WIDTH
 offsets_end:
