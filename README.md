@@ -8,6 +8,11 @@ careless move can leave a level unsolvable.
 
 **[Play it in your browser](https://tczajka.github.io/night-shift/)**
 
+<p>
+  <img src="images/screenshots/title.png" alt="The title screen" width="49%">
+  <img src="images/screenshots/level-96.png" alt="Level 96 being played: two of its five crates are on their targets" width="49%">
+</p>
+
 ## Target platform
 
 - ZX Spectrum 48K
