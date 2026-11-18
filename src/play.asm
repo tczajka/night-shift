@@ -233,10 +233,21 @@ square_cell:
     ld c,a
     ret
 
-; Show the level's pushes and time (Level.pushes, Level.time) in the
-; header, each only if it has changed since it was last shown.
+; Draw what changes from frame to frame: the bulldozer, in the current
+; frame of its move if it is moving (see draw_move), then the level's
+; pushes and time (Level.pushes, Level.time) in the header, each only if
+; it has changed since it was last shown.
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 draw:
+    ld a,(@Level.frame)
+    or a
+    jr nz,.moving
+    call draw_bulldozer         ; still: it may have turned
+    jr .board_done
+.moving:
+    call draw_move
+.board_done:
+
     ; show pushes
     ld hl,(@Level.pushes)
     ld de,(shown_pushes)
@@ -259,16 +270,123 @@ draw:
     ld de,@Screen.bitmap + @Header.TIME_COLUMN
     jp @Screen.print_time
 
+; Draw the squares that change in the current frame of the bulldozer's
+; move (Level.frame), from Anim.tiles: the square it leaves, then either
+; the square it enters or, in a push, the crate's square and the square
+; the crate enters.
+; Entry: moving.  Exit: none.  Clobbers: A, BC, DE, HL.
+draw_move:
+    ASSERT (@Anim.tiles & 0xFF) == 0 && @Anim.FRAMES == 16
+    ld a,(@Level.facing)        ; D = the frame's page in Anim.tiles
+    add a,a
+    add a,a
+    add a,a
+    add a,a
+    ld b,a
+    ld a,(@Level.frame)
+    add a,b
+    add a,(@Anim.tiles >> 8) - 1
+    ld d,a
+    call @Level.step
+    ld e,a                      ; E = step
+    ld a,(@Level.bulldozer)
+    ld l,a
+    ld h,@Level.board >> 8      ; HL = the square it leaves
+
+    ld c,@Anim.LEAVE_FLOOR
+    call draw_move_square
+    ld a,l                      ; the square ahead
+    add a,e
+    ld l,a
+    ld a,(hl)
+    and @Level.CRATE
+    jr nz,.push
+    ld c,@Anim.ENTER_FLOOR
+    jr draw_move_square
+.push:
+    ld c,@Anim.PUSH
+    call draw_move_square
+    ld a,l                      ; the square the crate enters
+    add a,e
+    ld l,a
+    ld c,@Anim.CRATE_FLOOR
+    ; fall through
+
+; Draw a square's tile in the current frame of a move.
+; Entry: HL = square in Level.board, C = kind of tile (see Anim): if
+; Anim.LEAVE_FLOOR, ENTER_FLOOR or CRATE_FLOOR, the target kind instead
+; when the square is a target; D = the frame's page in Anim.tiles.
+; Exit: DE, HL unchanged.  Clobbers: A, BC.
+draw_move_square:
+    ASSERT @Anim.LEAVE_TARGET == @Anim.LEAVE_FLOOR + 1
+    ASSERT @Anim.ENTER_TARGET == @Anim.ENTER_FLOOR + 1
+    ASSERT @Anim.CRATE_TARGET == @Anim.CRATE_FLOOR + 1
+    ld a,c
+    cp @Anim.PUSH
+    jr z,.kind_done             ; the same on a target
+    ld a,(hl)
+    and @Level.TARGET
+    jr z,.kind_done
+    inc c
+.kind_done:
+    push de
+    push hl
+    ld a,c                      ; E = kind * 0x20, the tile's low byte
+    rrca                        ; (kind < 8)
+    rrca
+    rrca
+    ld e,a
+    ld a,l
+    call square_cell            ; B, C = cell
+    ld l,e
+    ld h,d
+    call @Screen.draw_tile
+    pop hl
+    pop de
+    ret
+
 ; Act on the inputs. Jumped to from event_loop, not called, so it can
 ; switch to another screen with nothing left on the stack.
-; Pressing fire (Input.get_pressed) stops the time and pauses
-; (Pause.start); the inputs held (Input.held) do nothing yet.
+; - Pressing fire (Input.get_pressed) stops the time and pauses
+;   (Pause.start).
+; - While the bulldozer moves, go to the move's next frame; after its last
+;   frame, end the move (Level.end_move).
+; - When it isn't moving (or has just stopped), a direction held
+;   (Input.held) turns it that way and starts a move if it can
+;   (Level.move). With several held, the first of RIGHT, LEFT, DOWN, UP.
 ; Entry: none.
-; Exit: to Pause.start, or to update_return.  Clobbers: A, HL.
+; Exit: to Pause.start, or to update_return.  Clobbers: A, BC, HL.
 update:
     call @Input.get_pressed
     bit @Input.FIRE,a
+    jr nz,.pause
+
+    ld a,(@Level.frame)
+    or a
+    jr z,.still
+    cp @Anim.FRAMES
+    jr z,.end_move
+    inc a
+    ld (@Level.frame),a
+    jp update_return
+.end_move:
+    call @Level.end_move
+.still:
+    ld a,(@Input.held)
+    ASSERT @Math.RIGHT == 0 && @Math.LEFT == 1
+    ASSERT @Math.DOWN == 2 && @Math.UP == 3
+    and 0x0F                    ; the directions
     jp z,update_return
+    ld b,-1                     ; B = the first direction held
+.direction:
+    inc b
+    rrca
+    jr nc,.direction
+    ld a,b
+    call @Level.move
+    jp update_return
+
+.pause:
     xor a                       ; stop the time while paused
     ld (@Level.time_running),a
     jp @Pause.start

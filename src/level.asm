@@ -30,9 +30,9 @@ select:
     ret
 
 ; Load the current level (`number`) from the level data (Levels.data): set
-; up the board (see mark_floor) and the bulldozer, facing right, and set the
-; pushes and time to 0. Call it with the time stopped (`time_running`
-; clear).
+; up the board (see mark_floor) and the bulldozer, facing right and not
+; moving, and set the pushes and time to 0. Call it with the time stopped
+; (`time_running` clear).
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 load:
     ld a,(number)
@@ -86,6 +86,7 @@ load:
     xor a
     ASSERT @Math.RIGHT == 0
     ld (facing),a
+    ld (frame),a
     ld (time_frames),a
     ld h,a
     ld l,a
@@ -133,6 +134,89 @@ mark_floor:
     ld a,e
     cp NO_SQUARE
     jr nz,.visit
+    ret
+
+; Face a direction, and start moving that way (frame 1) if the bulldozer
+; can: if the square ahead is empty (no wall or crate), or has a crate with
+; an empty square beyond it.
+; Entry: A = direction (Math.RIGHT, LEFT, DOWN or UP), not moving.
+; Exit: none.  Clobbers: A, C, HL.
+move:
+    ld (facing),a
+    call step
+    ld c,a                      ; C = step
+    ld a,(bulldozer)
+    add a,c
+    ld l,a
+    ld h,board >> 8             ; HL = the square ahead
+    ld a,(hl)
+    and WALL
+    ret nz
+    ld a,(hl)
+    and CRATE
+    jr z,.go
+    ld a,l                      ; a crate: the square beyond it
+    add a,c
+    ld l,a
+    ld a,(hl)
+    and WALL | CRATE
+    ret nz
+.go:
+    ld a,1
+    ld (frame),a
+    ret
+
+; End the current move: the bulldozer, and the crate it pushes if any, are
+; now one step on, and a push adds 1 to `pushes` (up to 9999). Stop moving
+; (frame 0).
+; Entry: moving, in the last frame.  Exit: none.  Clobbers: A, C, HL.
+end_move:
+    xor a
+    ld (frame),a
+    call step
+    ld c,a                      ; C = step
+    ld a,(bulldozer)
+    add a,c
+    ld (bulldozer),a
+    ld l,a
+    ld h,board >> 8             ; HL = the bulldozer's new square
+    ld a,(hl)
+    and CRATE
+    ret z                       ; not a push
+    xor (hl)                    ; the crate moves to the square beyond
+    ld (hl),a
+    ld a,l
+    add a,c
+    ld l,a
+    ld a,(hl)
+    or CRATE
+    ld (hl),a
+
+    ld hl,(pushes)              ; pushes + 1, in BCD
+    ld a,l
+    add a,1
+    daa
+    ld c,a
+    ld a,h
+    adc a,0
+    daa
+    ret c                       ; already 9999: stay there
+    ld h,a
+    ld l,c
+    ld (pushes),hl
+    ret
+
+; Position offset of a step the way the bulldozer faces (`facing`).
+; Entry: none.  Exit: A = offset.  Clobbers: HL.
+step:
+    ld a,(facing)
+    ld hl,offsets
+    add a,l
+    ld l,a
+    adc a,h
+    sub l
+    ld h,a
+    ld a,(hl)
     ret
 
 ; If `time_running`, advance the current level's time by 1/50 of a second,
@@ -199,6 +283,7 @@ board_end:
     ASSERT board_end - board <= 0x100
 bulldozer:   DS 1               ; position of the bulldozer
 facing:      DS 1               ; direction it faces: Math.RIGHT, LEFT, DOWN or UP
+frame:       DS 1               ; its move's frame (1 to Anim.FRAMES), or 0
 pushes:      DS 2               ; pushes so far, BCD
 time:        DS 2               ; time so far, BCD 0xMMSS (minutes:seconds)
 time_frames: DS 1               ; frames (1/50 s) since `time` last changed, 0-49
