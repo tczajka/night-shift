@@ -23,6 +23,10 @@ no sound and uses no 128K features (AY sound, extra memory).
 - `make PROFILE=1` (or `make run PROFILE=1`) defines `PROFILE`, enabling
   the `PROFILE_BORDER` colour markers from `src/profile.asm`.
 - The assembler flags make warnings errors: a build must produce none.
+- `.github/workflows/pages.yml` builds the tape on each push to `main` and
+  publishes `web/index.html` on GitHub Pages with it and JSSpeccy 3
+  (both downloads pinned by SHA-256). JSSpeccy's tape auto-load fails on
+  a BASIC program name over 7 characters (see `src/tape.asm`).
 - Plain `make` only rebuilds on newer timestamps; use `make -B` to be sure.
 
 ## Code conventions

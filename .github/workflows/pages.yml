@@ -1,0 +1,76 @@
+# Build the game and publish it on GitHub Pages, playable in the browser in
+# JSSpeccy 3: web/index.html, with build/nightshift.tap and JSSpeccy's files
+# next to it.
+
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; don't cancel one in progress.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  SJASMPLUS_VERSION: 1.24.0
+  SJASMPLUS_SHA256: 0b5013f07e8d8505f9e296529655668b6fdf0268625c19e883b0fff484e209f1
+  JSSPECCY_VERSION: "3.2"
+  JSSPECCY_SHA256: 5434b5565da96a05089491f722c8fbcd8b3b70ab0277746309d2ee1db1fdbcb9
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The release's source archive, which includes the submodules.
+      - name: Build sjasmplus
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -sSfL -o sjasmplus.tar.xz \
+            "https://github.com/z00m128/sjasmplus/releases/download/v$SJASMPLUS_VERSION/sjasmplus-$SJASMPLUS_VERSION-src.tar.xz"
+          echo "$SJASMPLUS_SHA256  sjasmplus.tar.xz" | sha256sum -c -
+          tar -xJf sjasmplus.tar.xz
+          make -C "sjasmplus-$SJASMPLUS_VERSION" -j"$(nproc)"
+          echo "$RUNNER_TEMP/sjasmplus-$SJASMPLUS_VERSION" >> "$GITHUB_PATH"
+
+      - name: Build the game
+        run: make
+
+      - name: Get JSSpeccy
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -sSfL -o jsspeccy.zip \
+            "https://github.com/gasman/jsspeccy3/releases/download/v$JSSPECCY_VERSION/jsspeccy-$JSSPECCY_VERSION.zip"
+          echo "$JSSPECCY_SHA256  jsspeccy.zip" | sha256sum -c -
+          unzip -q jsspeccy.zip -d jsspeccy
+
+      - name: Put the site together
+        run: |
+          mkdir _site
+          cp web/index.html build/nightshift.tap _site/
+          cp -r "$RUNNER_TEMP/jsspeccy/jsspeccy" _site/jsspeccy
+          cp "$RUNNER_TEMP/jsspeccy/COPYING" _site/jsspeccy/
+          find _site -name .DS_Store -delete
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

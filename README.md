@@ -12,8 +12,7 @@ Early development. There is nothing to build or play yet.
 
 ## Target platform
 
-- ZX Spectrum 48K (compatibility with 128K / +2 / +3 to be confirmed)
-- No sound
+- ZX Spectrum 48K
 - Distributed as a `.tap` file that runs in emulators and on real hardware
 
 ## Controls
@@ -42,7 +41,10 @@ make clean    # removes build/
 
 ## Running
 
-Load `build/nightshift.tap` in a Spectrum emulator. Development uses
+Play it in the browser at <https://tczajka.github.io/night-shift/>, in
+[JSSpeccy 3](https://github.com/gasman/jsspeccy3).
+
+Or load `build/nightshift.tap` in a Spectrum emulator. Development uses
 [ZEsarUX](https://github.com/chernandezba/zesarux); `make run` builds the
 game and starts it in ZEsarUX as a 48K Spectrum.
 

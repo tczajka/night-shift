@@ -1,0 +1,120 @@
+<!doctype html>
+<!--
+  The GitHub Pages page (.github/workflows/pages.yml): the game in
+  JSSpeccy 3. The workflow adds nightshift.tap and JSSpeccy's files
+  (jsspeccy/) next to this page.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night Shift</title>
+<script src="jsspeccy/jsspeccy.js"></script>
+<style>
+  :root {
+    --bg: #101018;
+    --text: #e8e8f0;
+    --muted: #a0a0b4;
+    --accent: #ffd84a;
+    --link: #7fc8ff;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, sans-serif;
+  }
+  main {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+  h1 {
+    margin: 0 0 4px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  h2 {
+    margin: 32px 0 8px;
+    font-size: 1.1em;
+  }
+  p {
+    margin: 0 0 12px;
+  }
+  a {
+    color: var(--link);
+  }
+  .lead {
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  #emulator {
+    margin: 0 auto;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+  }
+  td {
+    padding: 2px 16px 2px 0;
+    vertical-align: top;
+  }
+  kbd {
+    font: inherit;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .small {
+    color: var(--muted);
+    font-size: 0.9em;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Night Shift</h1>
+  <p class="lead">A Sokoban-style puzzle game for the ZX Spectrum 48K.
+    Push every crate onto a target. You can push a crate but never pull
+    it, and only one at a time.</p>
+
+  <div id="emulator"></div>
+
+  <h2>Controls</h2>
+  <table>
+    <tr><td><kbd>Q</kbd> <kbd>A</kbd> <kbd>O</kbd> <kbd>P</kbd></td>
+        <td>Up, down, left, right</td></tr>
+    <tr><td><kbd>Space</kbd></td>
+        <td>Fire: choose a level, pause, confirm</td></tr>
+  </table>
+  <p class="small">The game starts by itself; press Space on the title
+    screen. Restart from the pause menu if you get stuck: there is no
+    undo.</p>
+
+  <h2>About</h2>
+  <p>Source code, and the tape file to play in other emulators or on a
+    real Spectrum: <a href="https://github.com/tczajka/night-shift">github.com/tczajka/night-shift</a>
+    (<a href="nightshift.tap">download nightshift.tap</a>).</p>
+  <p class="small">The levels are from Microban, a set of Sokoban
+    puzzles by David W. Skinner. The emulator is
+    <a href="https://github.com/gasman/jsspeccy3">JSSpeccy 3</a> by Matt
+    Westcott, under the
+    <a href="jsspeccy/COPYING">GNU General Public License v3</a>; its
+    source is in that repository.</p>
+</main>
+<script>
+  // The largest zoom (Spectrum pixels per screen pixel) whose 320-pixel
+  // wide picture, border included, fits the page.
+  var width = document.querySelector('main').clientWidth - 32;
+  var zoom = Math.max(1, Math.min(3, Math.floor(width / 320)));
+  JSSpeccy(document.getElementById('emulator'), {
+    machine: 48,
+    zoom: zoom,
+    openUrl: 'nightshift.tap',
+    autoStart: true,       // the game has no sound to be blocked
+    autoLoadTapes: true,
+    sandbox: true          // no menus for opening other files
+  });
+</script>
+</body>
+</html>
