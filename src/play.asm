@@ -350,12 +350,14 @@ draw_move_square:
 ; - Pressing fire (Input.get_pressed) stops the time and pauses
 ;   (Pause.start).
 ; - While the bulldozer moves, go to the move's next frame; after its last
-;   frame, end the move (Level.end_move).
+;   frame, end the move (Level.end_move), and if that solves the level (no
+;   crate left off a target), go to the solved screen (Solved.start).
 ; - When it isn't moving (or has just stopped), a direction held
 ;   (Input.held) turns it that way and starts a move if it can
 ;   (Level.move). With several held, the first of RIGHT, LEFT, DOWN, UP.
 ; Entry: none.
-; Exit: to Pause.start, or to update_return.  Clobbers: A, BC, HL.
+; Exit: to Pause.start, Solved.start, or update_return.
+; Clobbers: A, BC, HL.
 update:
     call @Input.get_pressed
     bit @Input.FIRE,a
@@ -371,6 +373,9 @@ update:
     jp update_return
 .end_move:
     call @Level.end_move
+    ld a,(@Level.remaining)
+    or a
+    jp z,@Solved.start
 .still:
     ld a,(@Input.held)
     ASSERT @Math.RIGHT == 0 && @Math.LEFT == 1

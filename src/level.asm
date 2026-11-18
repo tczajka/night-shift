@@ -23,6 +23,13 @@ select:
     ld (number_bcd),a
     call @Math.from_bcd
     ld (number),a
+    ; fall through
+
+; Copy the current level's high scores (Levels.high_scores) to
+; `best_pushes` and `best_time`.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+copy_best:
+    ld a,(number)
     call @Levels.high_score_address
     ld de,best_pushes
     ld bc,4                     ; pushes and time
@@ -31,8 +38,9 @@ select:
 
 ; Load the current level (`number`) from the level data (Levels.data): set
 ; up the board (see mark_floor) and the bulldozer, facing right and not
-; moving, and set the pushes and time to 0. Call it with the time stopped
-; (`time_running` clear).
+; moving, count the crates not on a target (`remaining`), and set the
+; pushes and time to 0. Call it with the time stopped (`time_running`
+; clear).
 ; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
 load:
     ld a,(number)
@@ -72,14 +80,20 @@ load:
     or TARGET
     ld (de),a
     djnz .target
-    ld b,c
+    ld b,c                      ; C = crates not on a target
 .crate:
     ld e,(hl)
     inc hl
     ld a,(de)
     or CRATE
     ld (de),a
+    and TARGET
+    jr z,.crate_done
+    dec c                       ; on a target
+.crate_done:
     djnz .crate
+    ld a,c
+    ld (remaining),a
 
     call mark_floor
 
@@ -167,8 +181,8 @@ move:
     ret
 
 ; End the current move: the bulldozer, and the crate it pushes if any, are
-; now one step on, and a push adds 1 to `pushes` (up to 9999). Stop moving
-; (frame 0).
+; now one step on; a push updates `remaining` and adds 1 to `pushes` (up
+; to 9999). Stop moving (frame 0).
 ; Entry: moving, in the last frame.  Exit: none.  Clobbers: A, C, HL.
 end_move:
     xor a
@@ -185,12 +199,24 @@ end_move:
     ret z                       ; not a push
     xor (hl)                    ; the crate moves to the square beyond
     ld (hl),a
+    and TARGET
+    jr z,.off_done
+    ld a,(remaining)            ; it was on a target
+    inc a
+    ld (remaining),a
+.off_done:
     ld a,l
     add a,c
     ld l,a
     ld a,(hl)
     or CRATE
     ld (hl),a
+    and TARGET
+    jr z,.on_done
+    ld a,(remaining)            ; it is on a target
+    dec a
+    ld (remaining),a
+.on_done:
 
     ld hl,(pushes)              ; pushes + 1, in BCD
     ld a,l
@@ -204,6 +230,54 @@ end_move:
     ld h,a
     ld l,c
     ld (pushes),hl
+    ret
+
+; Record the current level's pushes and time as its high scores
+; (Levels.high_scores, copied to `best_pushes` and `best_time`), each only
+; if it is better (lower) than the best so far. If the level wasn't solved
+; before, add 1 to Levels.solved_bcd.
+; Entry: none.  Exit: none.  Clobbers: A, BC, DE, HL.
+record_scores:
+    ld a,(number)
+    call @Levels.is_solved
+    jr nz,.counted
+    ld hl,(@Levels.solved_bcd)  ; + 1, in BCD
+    ld a,l
+    add a,1
+    daa
+    ld l,a
+    ld a,h
+    adc a,0
+    daa
+    ld h,a
+    ld (@Levels.solved_bcd),hl
+.counted:
+    ld a,(number)
+    call @Levels.high_score_address
+    ld de,(pushes)
+    call .better
+    ld de,(time)
+    call .better
+    jp copy_best
+
+    ; Store a score if it is lower than the best so far.
+    ; Entry: HL = the best (a word), DE = the score.
+    ; Exit: HL = the word after the best.  Clobbers: A, BC.
+.better:
+    ld c,(hl)
+    inc hl
+    ld b,(hl)                   ; BC = the best
+    ld a,e                      ; carry if DE < BC
+    sub c
+    ld a,d
+    sbc a,b
+    jr nc,.not_better
+    ld (hl),d
+    dec hl
+    ld (hl),e
+    inc hl
+.not_better:
+    inc hl
     ret
 
 ; Position offset of a step the way the bulldozer faces (`facing`).
@@ -282,6 +356,7 @@ board_end:
 bulldozer:   DS 1               ; position of the bulldozer
 facing:      DS 1               ; direction it faces: Math.RIGHT, LEFT, DOWN or UP
 frame:       DS 1               ; its move's frame (1 to Anim.FRAMES), or 0
+remaining:   DS 1               ; crates not on a target; 0: solved
 pushes:      DS 2               ; pushes so far, BCD
 time:        DS 2               ; time so far, BCD 0xMMSS (minutes:seconds)
 time_frames: DS 1               ; frames (1/50 s) since `time` last changed, 0-49

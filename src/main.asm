@@ -50,6 +50,7 @@ uninit_save DEFL uninit
     INCLUDE "level_select.asm"
     INCLUDE "play.asm"
     INCLUDE "pause.asm"
+    INCLUDE "solved.asm"
 code_end:
     ORG uninit_save
 uninit_end:
