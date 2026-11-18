@@ -22,6 +22,9 @@ TEXT_COLUMN EQU LEFT + 2        ; the menu lines' text
 
 start:
     PROFILE_BORDER @Color.BLACK    ; not the colour of the screen we came from
+    xor a                       ; stop the time while paused
+    ld (@Level.time_running),a
+
     ; The window: clear it, give it the border's colour, then the text's
     ; inside the border.
     ld bc,TOP << 8 | LEFT

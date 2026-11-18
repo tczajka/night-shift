@@ -347,8 +347,7 @@ draw_move_square:
 
 ; Act on the inputs. Jumped to from event_loop, not called, so it can
 ; switch to another screen with nothing left on the stack.
-; - Pressing fire (Input.get_pressed) stops the time and pauses
-;   (Pause.start).
+; - Pressing fire (Input.get_pressed) pauses (Pause.start).
 ; - While the bulldozer moves, go to the move's next frame; after its last
 ;   frame, end the move (Level.end_move), and if that solves the level (no
 ;   crate left off a target), go to the solved screen (Solved.start).
@@ -361,7 +360,7 @@ draw_move_square:
 update:
     call @Input.get_pressed
     bit @Input.FIRE,a
-    jr nz,.pause
+    jp nz,@Pause.start
 
     ld a,(@Level.frame)
     or a
@@ -390,11 +389,6 @@ update:
     ld a,b
     call @Level.move
     jp update_return
-
-.pause:
-    xor a                       ; stop the time while paused
-    ld (@Level.time_running),a
-    jp @Pause.start
 
 best_text:
     DB "Best"
