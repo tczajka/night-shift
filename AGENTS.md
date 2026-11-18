@@ -97,11 +97,9 @@ scheme avoids clash:
   rotations and faces its last move; its blade reaches the front tile edge
   so it stays in contact with the crate during a push. While it moves, its
   tracks advance 1 pixel per frame through 4 phases.
-- Bulldozer and crate are drawn as opaque 16×16 blocks by one routine; no
-  mask data. Horizontally shifted sprites merge their partial edge bytes
-  with an edge mask derived from the shift.
-- Each frame, the affected strip (at most 3 tiles) is built off-screen and
-  copied to the screen just after the frame interrupt.
+- Bulldozer and crate are opaque 16×16 blocks; no mask data. Every tile a
+  move changes, for each direction and frame, is precomputed at startup
+  into a 16K table (`Anim.tiles`), so drawing a move only copies tiles.
 
 ## Controls
 

@@ -12,7 +12,7 @@
 ;   8000-....  code and data (code..code_end), loaded from tape
 ;   A000-....  uninitialized (uninit..uninit_end): high scores
 ;              (Levels.high_scores), stack (Memory.stack), current level
-;              (Level.board, ...)
+;              (Level.board, ...), animation tiles (Anim.tiles, 16K)
 ;   FDFD-FDFF  interrupt entry (Interrupt.entry)
 ;   FE00-FF00  interrupt table (Interrupt.vectors)
 ;   FF58-FFFF  BASIC
@@ -45,6 +45,7 @@ uninit_save DEFL uninit
     INCLUDE "sprite.asm"
     INCLUDE "header.asm"
     INCLUDE "level.asm"
+    INCLUDE "anim.asm"
     INCLUDE "splash.asm"
     INCLUDE "level_select.asm"
     INCLUDE "play.asm"
