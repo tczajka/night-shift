@@ -81,8 +81,12 @@ screen:
 screen_end:
     ASSERT screen_end - screen == @Screen.attrs_end - @Screen.bitmap
 
+; The BASIC program's name, which the ROM prints ("Program: ...") when it
+; finds the header. At most 7 characters: with a longer name, JSSpeccy's
+; tape auto-load (web/index.html) stops with "5 Out of screen" while
+; printing it.
     EMPTYTAP "nightshift.tap"
-    SAVETAP "nightshift.tap", BASIC, "NightShift", basic, basic_end - basic, 10
+    SAVETAP "nightshift.tap", BASIC, "Night", basic, basic_end - basic, 10
     SAVETAP "nightshift.tap", CODE, "Screen", screen, screen_end - screen
     SAVETAP "nightshift.tap", CODE, "NightShift", @code, @code_end - @code
 
